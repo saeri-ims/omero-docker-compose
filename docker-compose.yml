@@ -32,15 +32,13 @@ services:
     image: openmicroscopy/omero-web-standalone:5.4
     environment:
       - OMEROHOST=omero
-      - CONFIG_omero_web_secure=true
-      - CONFIG_omero_web_application__server_host=0.0.0.0
     networks:
       - omero
     ports:
       - "4080:4080"
     volumes:
-      # Example web-apps configuration
-      - "./web/example-webapps.omero:/opt/omero/web/config/example-webapps.omero:ro"
+      # web-apps configuration
+      - "./web/additional-webapps.omero:/opt/omero/web/config/additional-webapps.omero:ro"
 
 networks:
   omero:

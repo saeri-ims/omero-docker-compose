@@ -1,0 +1,9 @@
+# omero-webtagging-autotag
+config append -- omero.web.apps '"omero_webtagging_autotag"'
+config append -- omero.web.ui.center_plugins '["Auto Tag", "omero_webtagging_autotag/auto_tag_init.js.html", "auto_tag_panel"]'
+
+# omero-webtagging-tagsearch
+config append -- omero.web.apps '"omero_webtagging_tagsearch"'
+
+# Top links
+config set -- omero.web.ui.top_links '[["Data", "webindex", {"title": "Browse Data via Projects, Tags etc"}],["History", "history", {"title": "History"}], ["Mapr", {"viewname": "maprindex_anyvalue"}, {"title": "Find Any Value"}], ["Tag Search", "tagsearch"], ["Figure", "figure_index", {"title": "Open Figure in new tab", "target": "_blank"}], ["Help", "https://help.openmicroscopy.org/", {"title":"Open OMERO user guide in a new tab", "target":"new"}]]'
