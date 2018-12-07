@@ -29,7 +29,7 @@ services:
       - "omero:/OMERO"
 
   web:
-    image: openmicroscopy/omero-web-standalone:5.4
+    image: manics/omero-web-standalone:5.4.9-ilaria
     environment:
       - OMEROHOST=omero
     networks:
