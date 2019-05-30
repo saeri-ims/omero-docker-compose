@@ -27,6 +27,7 @@ services:
       - "4064:4064"
     volumes:
       - "omero:/OMERO"
+      - "./custom_scripts:/opt/omero/server/OMERO.server/lib/scripts/custom_scripts:ro"
 
   web:
     image: manics/omero-web-standalone:5.4.9-ilaria
