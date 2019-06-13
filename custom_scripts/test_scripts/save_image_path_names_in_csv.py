@@ -22,8 +22,6 @@ FOR TRAINING PURPOSES ONLY!
 from omero.rtypes import rlong, rstring, unwrap, robject
 from omero.gateway import BlitzGateway
 import omero.scripts as scripts
-import os
-
 
 # Script definition
 
@@ -34,36 +32,37 @@ import os
 # this script only takes Images (not Datasets etc.)
 data_types = [rstring('Image')]
 client = scripts.client(
-    "rename_image_name.py",
-    ("Customised script for renaming image names"),
+    "save_image_path_names_in_csv.py",
+    ("Customised script to use for getting saving images and paths names in csv file"),
     # first parameter
     scripts.String(
         "Data_Type", optional=False, values=data_types, default="Image"),
     # second parameter
     scripts.List("IDs", optional=False).ofType(rlong(0)),
-    scripts.String("Prefix", default=""),
-    scripts.String("Postfix", default=""),
 )
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
-script_params = client.getInputs(unwrap=True)
-print script_params
 
 # get the 'IDs' parameter (which we have restricted to 'Image' IDs)
 ids = unwrap(client.getInput("IDs"))
 images = conn.getObjects("Image", ids)
 
-prefix = script_params["Prefix"]
-postfix = script_params["Postfix"]
+with open("selected_images_and_paths_names.txt", "w") as f:
+    for i in images:
+    	print i.name
+        image_paths = i.getImportedImageFilePaths()
+        f.write(i.name)
+        f.write(" ")
+        f.write(", ".join(image_paths['client_paths']))
+        f.write(" ")
+        f.write(", ".join(image_paths['server_paths']))
+        f.write('\n')
 
-for i in images:
-    print i.name
-    name, ext = os.path.splitext(i.name)
-    new_imagename = prefix + name + postfix + ext
-    print new_imagename
-    # i._obj.name = rstring(new_imagename)
-    i.setName(new_imagename)
-    i.save()
+
+file_ann = conn.createFileAnnfromLocalFile("selected_images_and_paths_names.txt", mimetype="text/plain", ns="image.names.foo")
+image = conn.getObject("Image", ids[0])
+image.linkAnnotation(file_ann)
+
 
 # Return some value(s).
 
@@ -72,5 +71,6 @@ for i in images:
 
 msg = "Script ran OK"
 client.setOutput("Message", rstring(msg))
+client.setOutput("File_Annotation", robject(file_ann._obj))
 
 client.closeSession()

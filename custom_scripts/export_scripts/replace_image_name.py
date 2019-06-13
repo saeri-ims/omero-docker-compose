@@ -35,7 +35,7 @@ import os
 data_types = [rstring('Image')]
 client = scripts.client(
     "replace_image_name.py",
-    ("Customised script to use for getting saving image names in csv file"),
+    ("Customised script for replacing text in selected images"),
     # first parameter
     scripts.String(
         "Data_Type", grouping="1", optional=False, values=data_types, default="Image"),

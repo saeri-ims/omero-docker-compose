@@ -1,0 +1,27 @@
+ipython
+
+import os 
+
+image_name = os.path.join("/media/warrah/1TB/Dundee/OMERO/", "b_test.jpg")
+
+print(image_name)    
+                                                                                         
+/media/warrah/1TB/Dundee/OMERO/b_test.jpg
+
+name, ext = os.path.splitext(image_name)  
+
+print(name)                                                                                             
+/media/warrah/1TB/Dundee/OMERO/b_test
+
+print(ext)                                                                                             
+.jpg
+
+add_prefix = input("Please enter the prefix to be added to the file name: ")
+
+print(add_prefix)
+
+new_imagename = (add_prefix + name + ext)
+
+os.rename(image_name, new_imagename)
+
+

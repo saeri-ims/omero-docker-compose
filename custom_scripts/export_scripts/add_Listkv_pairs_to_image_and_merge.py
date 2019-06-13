@@ -20,9 +20,13 @@ FOR TRAINING PURPOSES ONLY!
 # folder
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
-from omero.gateway import BlitzGateway
+from omero.gateway import BlitzGateway, MapAnnotationWrapper
+from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
+import omero
+
 import os
+
 
 
 # Script definition
@@ -31,39 +35,57 @@ import os
 # These parameters will be recognised by the Insight and web clients and
 # populated with the currently selected Image(s)
 
-# this script only takes Images (not Datasets etc.)
+# this script only takes Images
 data_types = [rstring('Image')]
 client = scripts.client(
-    "rename_image_name.py",
-    ("Customised script for renaming image names"),
+    "add_keys_and_values_to_a_dataset.py",
+    ("Customised script for adding a list of key_values pairs to selected images"),
     # first parameter
     scripts.String(
-        "Data_Type", optional=False, values=data_types, default="Image"),
+        "Data_Type", grouping="1", optional=False, values=data_types, default="Image"),
     # second parameter
-    scripts.List("IDs", optional=False).ofType(rlong(0)),
-    scripts.String("Prefix", default=""),
-    scripts.String("Postfix", default=""),
+    scripts.List("IDs", grouping="2", optional=False).ofType(rlong(0)),
+    scripts.List("New_keys", grouping="3", optional=False).ofType(rstring("")),
+    scripts.List("New_values", grouping="4", optional=False).ofType(rstring("")),
+
 )
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
 print script_params
 
+namespace = NSCLIENTMAPANNOTATION
+
 # get the 'IDs' parameter (which we have restricted to 'Image' IDs)
 ids = unwrap(client.getInput("IDs"))
 images = conn.getObjects("Image", ids)
-
-prefix = script_params["Prefix"]
-postfix = script_params["Postfix"]
+keys = unwrap(client.getInput("New_keys"))
+values = unwrap(client.getInput("New_values"))
 
 for i in images:
     print i.name
-    name, ext = os.path.splitext(i.name)
-    new_imagename = prefix + name + postfix + ext
-    print new_imagename
-    # i._obj.name = rstring(new_imagename)
-    i.setName(new_imagename)
-    i.save()
+    key_value_data = []
+
+    to_delete = []
+    for ann in i.listAnnotations(ns=namespace):
+        kv = ann.getValue()
+        key_value_data.extend(kv)
+        to_delete.append(ann.id)
+
+    for k, v in zip(keys, values):
+        key_value_data.append([k, v])
+    map_ann = omero.gateway.MapAnnotationWrapper(conn)
+    map_ann.setNs(namespace)
+    map_ann.setValue(key_value_data)
+    map_ann.save()
+    i.linkAnnotation(map_ann)
+
+    if len(to_delete) > 0:
+        conn.deleteObjects('Annotation', to_delete)
+
+    print key_value_data
+
+# Use 'client' namespace to allow editing in Insight & web
 
 # Return some value(s).
 

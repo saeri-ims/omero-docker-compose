@@ -20,9 +20,14 @@ FOR TRAINING PURPOSES ONLY!
 # folder
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
-from omero.gateway import BlitzGateway
+from omero.gateway import BlitzGateway, MapAnnotationWrapper
+from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
+import omero
+
 import os
+import csv
+
 
 
 # Script definition
@@ -31,39 +36,62 @@ import os
 # These parameters will be recognised by the Insight and web clients and
 # populated with the currently selected Image(s)
 
-# this script only takes Images (not Datasets etc.)
-data_types = [rstring('Image')]
+# this script only takes Datasets
+data_types = [rstring('Dataset')]
 client = scripts.client(
-    "rename_image_name.py",
-    ("Customised script for renaming image names"),
+    "add_keys_and_values_to_a_dataset_from_csv.py",
+    ("Customised script for adding key_values pairs to a dataset from imported csv"),
     # first parameter
     scripts.String(
-        "Data_Type", optional=False, values=data_types, default="Image"),
+        "Data_Type", grouping="1", optional=False, values=data_types, default="Dataset"),
     # second parameter
-    scripts.List("IDs", optional=False).ofType(rlong(0)),
-    scripts.String("Prefix", default=""),
-    scripts.String("Postfix", default=""),
+    scripts.List("IDs", grouping="2", optional=False).ofType(rlong(0)),
+    scripts.String("File_Annotation", grouping="3", default=""),
+    #scripts.Long("File_Annotation", grouping="3", default=""),
+
 )
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
 print script_params
 
-# get the 'IDs' parameter (which we have restricted to 'Image' IDs)
+# Use 'client' namespace to allow editing in Insight & web
+
+namespace = NSCLIENTMAPANNOTATION
+
+# get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
-images = conn.getObjects("Image", ids)
 
-prefix = script_params["Prefix"]
-postfix = script_params["Postfix"]
+file_id = script_params["File_Annotation"]  #question why not simply file_id= File_Annotation?
+file_ann = conn.getObject("FileAnnotation", file_id)
+csv_text = "".join(list(file_ann.getFileInChunks()))
+print csv_text
+lines = csv_text.split("\n")
+print lines
+data = []
 
-for i in images:
-    print i.name
-    name, ext = os.path.splitext(i.name)
-    new_imagename = prefix + name + postfix + ext
-    print new_imagename
-    # i._obj.name = rstring(new_imagename)
-    i.setName(new_imagename)
-    i.save()
+for l in lines:
+    kv = l.split(",", 1)
+    print kv
+    if len(kv) == 2:
+        data.append(kv)
+    elif len(kv) == 1:
+        data.append([kv[0], ""])
+
+# data = [l.split(",") for l in lines]
+
+
+
+# only link a client map annotation to a single object
+
+for dataset in conn.getObjects("Dataset", ids):
+    map_ann = omero.gateway.MapAnnotationWrapper(conn)
+    map_ann.setNs(namespace)
+    map_ann.setValue(data)
+    map_ann.save()
+    dataset.linkAnnotation(map_ann)
+
+
 
 # Return some value(s).
 

@@ -33,7 +33,7 @@ import omero.scripts as scripts
 data_types = [rstring('Image')]
 client = scripts.client(
     "save_image_path_names_in_csv.py",
-    ("Customised script to use for getting saving images and paths names in csv file"),
+    ("Customised script for saving image names and paths in csv file from selected images"),
     # first parameter
     scripts.String(
         "Data_Type", optional=False, values=data_types, default="Image"),
@@ -47,7 +47,7 @@ conn = BlitzGateway(client_obj=client)
 ids = unwrap(client.getInput("IDs"))
 images = conn.getObjects("Image", ids)
 
-with open("selected_images_and_paths_names.txt", "w") as f:
+with open("selected_images_and_paths_names.csv", "w") as f:
     for i in images:
     	print i.name
         image_paths = i.getImportedImageFilePaths()
@@ -59,7 +59,7 @@ with open("selected_images_and_paths_names.txt", "w") as f:
         f.write('\n')
 
 
-file_ann = conn.createFileAnnfromLocalFile("selected_images_and_paths_names.txt", mimetype="text/plain", ns="image.names.foo")
+file_ann = conn.createFileAnnfromLocalFile("selected_images_and_paths_names.csv", mimetype="text/csv", ns="image.names.foo")
 image = conn.getObject("Image", ids[0])
 image.linkAnnotation(file_ann)
 

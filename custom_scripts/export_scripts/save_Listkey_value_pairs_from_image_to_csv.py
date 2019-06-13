@@ -20,8 +20,14 @@ FOR TRAINING PURPOSES ONLY!
 # folder
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
-from omero.gateway import BlitzGateway
+from omero.gateway import BlitzGateway, MapAnnotationWrapper
+from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
+import omero
+
+import os
+
+
 
 # Script definition
 
@@ -29,34 +35,64 @@ import omero.scripts as scripts
 # These parameters will be recognised by the Insight and web clients and
 # populated with the currently selected Image(s)
 
-# this script only takes Images (not Datasets etc.)
+# this script only takes Images
 data_types = [rstring('Image')]
 client = scripts.client(
-    "save_image_name_in_csv.py",
-    ("Customised script for saving image names in csv file from selected images"),
+    "save_listkv_pairs_from_image_to_csv.py",
+    ("Customised script for saving a list of key_values pairs from selected images to csv file"),
     # first parameter
     scripts.String(
-        "Data_Type", optional=False, values=data_types, default="Image"),
+        "Data_Type", grouping="1", optional=False, values=data_types, default="Image"),
     # second parameter
-    scripts.List("IDs", optional=False).ofType(rlong(0)),
+    scripts.List("IDs", grouping="2", optional=False).ofType(rlong(0)),
+    scripts.List("New_keys", grouping="3", optional=False).ofType(rstring("")),
+    scripts.List("New_values", grouping="4", optional=False).ofType(rstring("")),
+
 )
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
+script_params = client.getInputs(unwrap=True)
+print script_params
+
+# Use 'client' namespace to allow editing in Insight & web
+namespace = NSCLIENTMAPANNOTATION
 
 # get the 'IDs' parameter (which we have restricted to 'Image' IDs)
 ids = unwrap(client.getInput("IDs"))
 images = conn.getObjects("Image", ids)
+keys = unwrap(client.getInput("New_keys"))
+values = unwrap(client.getInput("New_values"))
 
-with open("selected_images_names.csv", "w") as f:
+with open("export_annotation.csv", "w") as f:
     for i in images:
-    	print i.name, '\n'
+        print i.name
+        key_value_data = []
+
+        to_delete = []
+        for ann in i.listAnnotations(ns=namespace):
+            kv = ann.getValue()
+            key_value_data.extend(kv)
+            to_delete.append(ann.id)
+
+        key_value_data.extend([keys, values])
+        map_ann = omero.gateway.MapAnnotationWrapper(conn)
+        map_ann.setNs(namespace)
+        map_ann.setValue(key_value_data)
+        map_ann.save()
+        i.linkAnnotation(map_ann)
+
+        if len(to_delete) > 0:
+            conn.deleteObjects('Annotation', to_delete)
+
+        print key_value_data, '\n'
         f.write(i.name)
+        f.write(kv)
         f.write('\n')
 
-file_ann = conn.createFileAnnfromLocalFile("selected_images_names.csv", mimetype="text/csv", ns="image.names.foo")
+
+file_ann = conn.createFileAnnfromLocalFile("export_annotation.csv", mimetype="text/csv", ns="image.names.foo")
 image = conn.getObject("Image", ids[0])
 image.linkAnnotation(file_ann)
-
 
 # Return some value(s).
 
@@ -65,6 +101,5 @@ image.linkAnnotation(file_ann)
 
 msg = "Script ran OK"
 client.setOutput("Message", rstring(msg))
-client.setOutput("File_Annotation", robject(file_ann._obj))
 
 client.closeSession()

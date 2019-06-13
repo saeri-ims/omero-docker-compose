@@ -1,0 +1,16 @@
+image_name = 'ch28_test.jpg'
+print(image_name)
+ch28_test.jpg
+
+old_text = input("Please enter the text in the file name to be replaced: ")
+print(old_text)
+_test
+
+new_text = input("Please enter the new text to be use for replacement: ")
+print(new_text)
+_final
+
+print(image_name.replace(old_text, new_text))
+ch28_final.jpg
+
+
