@@ -13,7 +13,7 @@ services:
       - "database:/var/lib/postgresql/data"
 
   omero:
-    image: openmicroscopy/omero-server:5.4
+    image: openmicroscopy/omero-server:5.5.0
     environment:
       - CONFIG_omero_db_host=database
       - CONFIG_omero_db_user=omero
@@ -30,7 +30,7 @@ services:
       - "./custom_scripts:/opt/omero/server/OMERO.server/lib/scripts/custom_scripts:ro"
 
   web:
-    image: manics/omero-web-standalone:5.4.9-ilaria
+    image: openmicroscopy/omero-web-standalone:5.5.0
     environment:
       - OMEROHOST=omero
     networks:
