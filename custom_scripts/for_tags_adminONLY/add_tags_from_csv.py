@@ -32,23 +32,17 @@ import csv
 
 # Script definition
 
-# Script name, description and 2 parameters are defined here.
+# Script name, description and parameters are defined here.
 # These parameters will be recognised by the Insight and web clients and
 # populated with the currently selected Image(s)
 
-# this script only takes Datasets
-#data_types = [rstring('Dataset')]
+# this script allows importing tags in the group where the csv file has been attached to
+#the recommandation is that ADMIN is always member of a group and ADMIN creates a project called tags
 client = scripts.client(
     "add_tags_from_csv.py",
     ("Customised script for adding tags from imported csv"),
-    #first parameter
-    # scripts.String(
-    #     "Tagname_column", grouping="1", optional=False, description="Name the csv column with tag names"),
-    # # second parameter
-    # scripts.String(
-    #      "Description_column", grouping="2", optional=False, description="Name the csv column with tag name description"),
+
     scripts.Long("File_Annotation"),
-    #scripts.Long("File_Annotation", grouping="3", default=""),
 
 )
 # we can now create our Blitz Gateway by wrapping the client object
@@ -57,8 +51,7 @@ script_params = client.getInputs(unwrap=True)
 print script_params
 
 
-# get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
-#ids = unwrap(client.getInput("IDs"))
+# get the 'IDs' parameter of the csv file imported as annotation
 
 file_id = script_params["File_Annotation"]
 file_ann = conn.getObject("FileAnnotation", file_id)
