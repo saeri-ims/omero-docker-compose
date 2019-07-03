@@ -61,32 +61,36 @@ lines = csv_text.split("\n")
 print lines
 
 #check tags in all groups
-conn.SERVICE_OPTS.setOmeroGroup('-1')
+groups = conn.getObject("ExperimenterGroup")
+gid = groups.getDetails().id.val #this is not correct
+
+for g in groups:
+    conn.SERVICE_OPTS.setOmeroGroup(gid)
 
 
-data = []
+    data = []
 
-col_names = lines[0]
+    col_names = lines[0]
 
-name_index = 0
-desc_index = 1
+    name_index = 0
+    desc_index = 1
 
 
-for l in lines[1:]:
-    cols = l.split(",")
-    print cols
-    if len(cols) < 1:
-        continue
-    text = cols[name_index]
-    tags = list(conn.getObjects("TagAnnotation", attributes={"textValue": text}))
-    if len(tags) > 0:
-        print "Tag '%s' already exists" % text
-        continue
-    tag_ann = omero.gateway.TagAnnotationWrapper(conn)
-    tag_ann.setValue(text)
-    if len(cols) > 1:
-        tag_ann.setDescription(cols[desc_index])
-    tag_ann.save()
+    for l in lines[1:]:
+        cols = l.split(",")
+        print cols
+        if len(cols) < 1:
+            continue
+        text = cols[name_index]
+        tags = list(conn.getObjects("TagAnnotation", attributes={"textValue": text}))
+        if len(tags) > 0:
+            print "Tag '%s' already exists" % text
+            continue
+        tag_ann = omero.gateway.TagAnnotationWrapper(conn)
+        tag_ann.setValue(text)
+        if len(cols) > 1:
+            tag_ann.setDescription(cols[desc_index])
+        tag_ann.save()
 
 
 

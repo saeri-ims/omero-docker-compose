@@ -25,6 +25,7 @@ from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
 import omero
 
+from datetime import date
 import os
 
 
@@ -63,7 +64,7 @@ images = conn.getObjects("Image", ids)
 keys = unwrap(client.getInput("New_keys"))
 values = unwrap(client.getInput("New_values"))
 
-with open("export_annotation.csv", "w") as f:
+with open("tags_to_check-" + str(date.today()) + ".csv", "w") as f:
     for i in images:
         print i.name
         key_value_data = []
@@ -90,7 +91,7 @@ with open("export_annotation.csv", "w") as f:
         f.write('\n')
 
 
-file_ann = conn.createFileAnnfromLocalFile("export_annotation.csv", mimetype="text/csv", ns="image.names.foo")
+file_ann = conn.createFileAnnfromLocalFile("tags_to_check-" + str(date.today()) + ".csv", mimetype="text/csv", ns="image.names.foo")
 image = conn.getObject("Image", ids[0])
 image.linkAnnotation(file_ann)
 

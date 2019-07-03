@@ -61,7 +61,7 @@ for tag in conn.getObjects("TagAnnotation"):
 
 tags.sort(key=lambda tag: tag[0].islower())
 
-#create the csv file in which to copy the tag list
+#in the listed tags check the duplicates and retain only the firts found and relink the images to this retained tag
 prev_tag = ""
 prev_id = 0
 for t in tags:
@@ -77,7 +77,7 @@ for t in tags:
 
 # set group to save file to. NB: hard-coded as stystem group
 conn.SERVICE_OPTS.setOmeroGroup('0')
-file_ann = conn.createFileAnnfromLocalFile("tags_merged.csv", mimetype="text/csv", ns="tags.to.be.merged")
+file_ann = conn.createFileAnnfromLocalFile("tags_merged.csv", mimetype="text/csv", ns="tags.to.be.merged")  #this should be commented?
 
 
 

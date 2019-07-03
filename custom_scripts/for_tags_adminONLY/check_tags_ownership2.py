@@ -25,9 +25,10 @@ from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
 import omero
 
+from datetime import date
+
 import os
 import csv
-import time
 
 # Script definition
 
@@ -48,10 +49,6 @@ conn.SERVICE_OPTS.setOmeroGroup('-1')
 
 script_params = client.getInputs(unwrap=True)
 print script_params
-
-#specify current time
-timestr = time.strftime("%Y-%m-%d")
-print timestr
 
 #get first the user ID as we want to search only for the tags that do not belong to the user id which is the admin
 myOwnerId = conn.getUserId()
@@ -74,7 +71,7 @@ for tag in conn.getObjects("TagAnnotation"):
 tags.sort(key=lambda tag: tag[0].islower())
 
 #create the csv file in which to copy the tag list
-with open("tags_to_check.csv" %timestr, "w") as f:
+with open("tags_to_check-" + str(date.today()) + ".csv", "w") as f:
     f.write("tag name, description, tag ID, owner ID\n")
     for t in tags:
         f.write(",".join(t))
@@ -82,7 +79,7 @@ with open("tags_to_check.csv" %timestr, "w") as f:
 
 # set group to save file to. NB: hard-coded as stystem group
 conn.SERVICE_OPTS.setOmeroGroup('0')
-file_ann = conn.createFileAnnfromLocalFile("tags_to_check.csv" %timestr, mimetype="text/csv", ns="tags.to.check")
+file_ann = conn.createFileAnnfromLocalFile("tags_to_check-" + str(date.today()) + ".csv", mimetype="text/csv", ns="tags.to.check")
 
 
 
