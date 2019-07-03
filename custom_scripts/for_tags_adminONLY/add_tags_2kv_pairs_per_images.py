@@ -29,14 +29,14 @@ import os
 
 # Script definition
 
-# Script name, description and 2 parameters are defined here.
+# Script name, description and parameters are defined here.
 # These parameters will be recognised by the Insight and web clients and
 # populated with the currently selected Image(s)
 
 # this script only takes Images
 data_types = [rstring('Image')]
 client = scripts.client(
-    "copy_tags_2kvpairs.py",
+    "copy_tags_2kvpairs_per_images.py",
     ("Customised script for copying tags names to key_values pairs for each image"),
 
     scripts.String(
