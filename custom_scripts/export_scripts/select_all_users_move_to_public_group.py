@@ -20,8 +20,14 @@ FOR TRAINING PURPOSES ONLY!
 # folder
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
-from omero.gateway import BlitzGateway
+from omero.gateway import BlitzGateway, MapAnnotationWrapper
+from omero.constants.metadata import NSCLIENTMAPANNOTATION
+from omero.model import ExperimenterI, ExperimenterGroupI
 import omero.scripts as scripts
+import omero
+
+import os
+
 
 # Script definition
 
@@ -29,33 +35,40 @@ import omero.scripts as scripts
 # These parameters will be recognised by the Insight and web clients and
 # populated with the currently selected Image(s)
 
-# this script only takes Images (not Datasets etc.)
-data_types = [rstring('Image')]
+# this script only takes all users
 client = scripts.client(
-    "save_image_name_in_csv.py",
-    ("Customised script to use for getting saving image names in csv file"),
-    # first parameter
-    scripts.String(
-        "Data_Type", optional=False, values=data_types, default="Image"),
-    # second parameter
-    scripts.List("IDs", optional=False).ofType(rlong(0)),
+    "select_users_move_to_public_group.py",
+    ("Customised script for selecting users and adding them to the public domain group"),
 )
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
+script_params = client.getInputs(unwrap=True)
+print script_params
 
-# get the 'IDs' parameter (which we have restricted to 'Image' IDs)
-ids = unwrap(client.getInput("IDs"))
-images = conn.getObjects("Image", ids)
+# Use 'client' namespace to allow editing in Insight & web
 
-with open("selected_images_names.txt", "w") as f:
-    for i in images:
-    	print i.name, '\n'
-        f.write(i.name)
-        f.write('\n')
+namespace = NSCLIENTMAPANNOTATION
 
-file_ann = conn.createFileAnnfromLocalFile("selected_images_names.txt", mimetype="text/plain", ns="image.names.foo")
-image = conn.getObject("Image", ids[0])
-image.linkAnnotation(file_ann)
+# list users with the 'IDs' parameter
+#exp_id = script_params["Experimenter"]
+experimenters = conn.getObjects("Experimenter")
+exp_ids = []
+
+for e in experimenters:
+    print e.id, e.firstName, e.lastName
+    if e.id > 1:
+        exp_ids.append(e.id)
+
+print "list ids", exp_ids
+
+
+# move users to a single object, in this case public domain
+
+public_group_id = 5
+adminService = conn.getAdminService()
+
+for eid in exp_ids:
+    adminService.addGroups(ExperimenterI(eid, False), [ExperimenterGroupI(public_group_id, False)])
 
 
 # Return some value(s).
@@ -65,6 +78,5 @@ image.linkAnnotation(file_ann)
 
 msg = "Script ran OK"
 client.setOutput("Message", rstring(msg))
-client.setOutput("File_Annotation", robject(file_ann._obj))
 
 client.closeSession()

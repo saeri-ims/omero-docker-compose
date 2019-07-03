@@ -20,8 +20,12 @@ FOR TRAINING PURPOSES ONLY!
 # folder
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
-from omero.gateway import BlitzGateway
+from omero.gateway import BlitzGateway, MapAnnotationWrapper
 import omero.scripts as scripts
+import omero
+
+import os
+
 
 # Script definition
 
@@ -29,39 +33,61 @@ import omero.scripts as scripts
 # These parameters will be recognised by the Insight and web clients and
 # populated with the currently selected Image(s)
 
-# this script only takes Images (not Datasets etc.)
+# this script only takes Images
 data_types = [rstring('Image')]
 client = scripts.client(
-    "save_image_path_names_in_csv.py",
-    ("Customised script to use for getting saving images and paths names in csv file"),
-    # first parameter
+    "copy_tags_2kvpairs.py",
+    ("Customised script for copying tags names to key_values pairs for each image"),
+
     scripts.String(
-        "Data_Type", optional=False, values=data_types, default="Image"),
-    # second parameter
-    scripts.List("IDs", optional=False).ofType(rlong(0)),
+        "Data_Type", grouping="1", optional=False, values=data_types, default="Image"),
+
 )
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
+script_params = client.getInputs(unwrap=True)
+print script_params
+
+namespace = "kvpairs.from.tags.script"
 
 # get the 'IDs' parameter (which we have restricted to 'Image' IDs)
 ids = unwrap(client.getInput("IDs"))
-images = conn.getObjects("Image", ids)
-
-with open("selected_images_and_paths_names.txt", "w") as f:
-    for i in images:
-    	print i.name
-        image_paths = i.getImportedImageFilePaths()
-        f.write(i.name)
-        f.write(" ")
-        f.write(", ".join(image_paths['client_paths']))
-        f.write(" ")
-        f.write(", ".join(image_paths['server_paths']))
-        f.write('\n')
+image = conn.getObjects("Image", ids)
 
 
-file_ann = conn.createFileAnnfromLocalFile("selected_images_and_paths_names.txt", mimetype="text/plain", ns="image.names.foo")
-image = conn.getObject("Image", ids[0])
-image.linkAnnotation(file_ann)
+for i in image:
+    print i.name
+
+    tag_values = []
+
+    for ann in i.listAnnotations():
+        if isinstance(ann, omero.gateway.TagAnnotationWrapper):
+            tag_values.append(ann.textValue)
+
+    print "list tags", tag_values
+
+    key_values = []
+
+    for index, value in enumerate(tag_values):
+        key_values.append([str(index), value])
+
+    print "list kvs", key_values
+
+
+    to_delete = []
+    for ann in i.listAnnotations(ns=namespace):
+        kv = ann.getValue()
+        to_delete.append(ann.id)
+
+
+    map_ann = omero.gateway.MapAnnotationWrapper(conn)
+    map_ann.setNs(namespace)
+    map_ann.setValue(key_values)
+    map_ann.save()
+    i.linkAnnotation(map_ann)
+
+    if len(to_delete) > 0:
+        conn.deleteObjects('Annotation', to_delete)
 
 
 # Return some value(s).
@@ -71,6 +97,5 @@ image.linkAnnotation(file_ann)
 
 msg = "Script ran OK"
 client.setOutput("Message", rstring(msg))
-client.setOutput("File_Annotation", robject(file_ann._obj))
 
 client.closeSession()

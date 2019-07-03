@@ -21,62 +21,67 @@ FOR TRAINING PURPOSES ONLY!
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
 from omero.gateway import BlitzGateway, MapAnnotationWrapper
+from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
 import omero
 
 import os
-
+import csv
 
 
 # Script definition
 
-# Script name, description and 2 parameters are defined here.
+# Script name, description and parameters are defined here.
 # These parameters will be recognised by the Insight and web clients and
 # populated with the currently selected Image(s)
 
-# this script only takes Images (not Datasets etc.)
-data_types = [rstring('Image')]
+# this script only takes all tags (project, datasets, images)
 client = scripts.client(
-    "add_2keys_and_values_to_an_image.py",
-    ("Customised script for adding 2 key_values pairs to an image"),
-    # first parameter
-    scripts.String(
-        "Data_Type", grouping="1", optional=False, values=data_types, default="Image"),
-    # second parameter
-    scripts.List("IDs", grouping="2", optional=False).ofType(rlong(0)),
-    scripts.String("First_key", grouping="3", default=""),
-    scripts.String("First_value", grouping="4", default=""),
-    scripts.String("Second_key", grouping="5", default=""),
-    scripts.String("Second_value", grouping="6", default=""),
+    "add_checked_tags_from_csv.py",
+    ("Customised script for adding new checked tags from csv"),
+    scripts.Long("File_Annotation"),
+
 )
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
 print script_params
 
-namespace = omero.constants.metadata.NSCLIENTMAPANNOTATION
+#check tags in all groups
+conn.SERVICE_OPTS.setOmeroGroup('-1')
 
-# get the 'IDs' parameter (which we have restricted to 'Image' IDs)
-ids = unwrap(client.getInput("IDs"))
-images = conn.getObjects("Image", ids)
+# get the 'IDs' parameter of the tags
 
-first_k = script_params["First_key"]
-first_v = script_params["First_value"]
-second_k = script_params["Second_key"]
-second_v = script_params["Second_value"]
+file_id = script_params["File_Annotation"]
+file_ann = conn.getObject("FileAnnotation", file_id)
+csv_text = "".join(list(file_ann.getFileInChunks()))
+print csv_text
+lines = csv_text.split("\n")
+print lines
+data = []
 
-for i in images:
-    print i.name
-    key_value_data = [[first_k, first_v], [second_k, second_v]]
-    map_ann = omero.gateway.MapAnnotationWrapper(conn)
-    map_ann.setNs(namespace)
-    map_ann.setValue(key_value_data)
-    map_ann.save()
-    i.linkAnnotation(map_ann)
+col_names = lines[0]
 
-    print key_value_data
+name_index = 0
+desc_index = 1
 
-# Use 'client' namespace to allow editing in Insight & web
+for l in lines[1:]:
+    conn.SERVICE_OPTS.setOmeroGroup('-1')
+    cols = l.split(",")
+    print cols
+    if len(cols) < 3:
+        continue
+    text = cols[name_index]
+    tag_id = cols[2]
+    tag_ann = conn.getObject("TagAnnotation", tag_id)
+    tag_ann.setValue(text)
+    gid = tag_ann.getDetails().group.id.val
+    conn.SERVICE_OPTS.setOmeroGroup(gid)
+    if len(cols) > 1:
+        tag_ann.setDescription(cols[desc_index])
+    tag_ann.save()
+
+
 
 # Return some value(s).
 
