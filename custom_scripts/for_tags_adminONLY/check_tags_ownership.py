@@ -25,6 +25,8 @@ from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
 import omero
 
+from datetime import date
+
 import os
 import csv
 
@@ -69,7 +71,7 @@ for tag in conn.getObjects("TagAnnotation"):
 tags.sort(key=lambda tag: tag[0].islower())
 
 #create the csv file in which to copy the tag list
-with open("tags_to_check.csv", "w") as f:
+with open("tags_to_check-" + str(date.today()) + ".csv", "w") as f:
     f.write("tag name, description, tag ID, owner ID\n")
     for t in tags:
         f.write(",".join(t))
@@ -77,7 +79,7 @@ with open("tags_to_check.csv", "w") as f:
 
 # set group to save file to. NB: hard-coded as stystem group
 conn.SERVICE_OPTS.setOmeroGroup('0')
-file_ann = conn.createFileAnnfromLocalFile("tags_to_check.csv", mimetype="text/csv", ns="tags.to.check")
+file_ann = conn.createFileAnnfromLocalFile("tags_to_check-" + str(date.today()) + ".csv", mimetype="text/csv", ns="tags.to.check")
 
 
 
