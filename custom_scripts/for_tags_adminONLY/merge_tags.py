@@ -37,7 +37,7 @@ import csv
 # this script only takes tags
 client = scripts.client(
     "merge_tags.py",
-    ("Customised script for merging tags with the same names"),
+    ("Customised script for merging tags with the same names. Valid for images only"),
 
 )
 # we can now create our Blitz Gateway by wrapping the client object
@@ -49,36 +49,38 @@ script_params = client.getInputs(unwrap=True)
 print script_params
 
 
-#create a list of tags and append only the tags, tag id and tag owner id to it
-tags = []
-
-for tag in conn.getObjects("TagAnnotation"):
-    owner = tag.getDetails().owner.id.val
-    print tag.textValue, owner
-    tags.append([tag.textValue, str(tag.id), str(owner)])
-
-#sort the tags in descending order to allow to see duplicates
-
-tags.sort(key=lambda tag: tag[0].islower())
 
 #in the listed tags check the duplicates and retain only the firts found and relink the images to this retained tag
-prev_tag = ""
-prev_id = 0
-for t in tags:
-    tag_id = str(t[1)  ##there is a mistake here
-    if t[0] == prev_tag:
-        # move all tagged objects to previous tags and delete
-        for link in conn.getAnnotationLinks('Image', ann_ids=[tag_id]):
-            link._obj.child = omero.model.TagAnnotationI(prev_id, False)
-            link.save()
-        conn.deleteObjects('TagAnnotation', [tag_id])
-    prev_tad = t[0]
-    prev_id = tag_id
+for g in conn.getObjects("ExperimenterGroup"):
+    conn.SERVICE_OPTS.setOmeroGroup(g.id)
+    print "----groups", g.id, g.name
 
-# set group to save file to. NB: hard-coded as stystem group
-conn.SERVICE_OPTS.setOmeroGroup('0')
-file_ann = conn.createFileAnnfromLocalFile("tags_merged.csv", mimetype="text/csv", ns="tags.to.be.merged")  #this should be commented?
+    #create a list of tags and append only the tags, tag id and tag owner id to it
+    tags = []
 
+    for tag in conn.getObjects("TagAnnotation"):
+        owner = tag.getDetails().owner.id.val
+        print tag.textValue, owner
+        tags.append([tag.textValue, str(tag.id), str(owner)])
+
+    #sort the tags in descending order to allow to see duplicates
+
+    tags.sort(key=lambda tag: tag[0].lower())
+    print "sorted tags", tags
+
+
+    prev_tag = ""
+    prev_id = 0
+    for t in tags:
+        tag_id = str(t[1])
+        if t[0] == prev_tag:
+            # move all tagged objects to previous tags and delete
+            for link in conn.getAnnotationLinks('Image', ann_ids=[tag_id]):
+                link._obj.child = omero.model.TagAnnotationI(prev_id, False)
+                link.save()
+            conn.deleteObjects('TagAnnotation', [tag_id])
+        prev_tag = t[0]
+        prev_id = tag_id
 
 
 # Return some value(s).
@@ -88,6 +90,5 @@ file_ann = conn.createFileAnnfromLocalFile("tags_merged.csv", mimetype="text/csv
 
 msg = "Script ran OK"
 client.setOutput("Message", rstring(msg))
-client.setOutput("File_Annotation", robject(file_ann._obj))
 
 client.closeSession()
