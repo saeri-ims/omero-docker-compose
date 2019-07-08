@@ -61,12 +61,10 @@ lines = csv_text.split("\n")
 print lines
 
 #check tags in all groups
-groups = conn.getObject("ExperimenterGroup")
-gid = groups.getDetails().id.val #this is not correct
-
-for g in groups:
-    conn.SERVICE_OPTS.setOmeroGroup(gid)
-
+for g in conn.getObjects("ExperimenterGroup"):
+    conn.SERVICE_OPTS.setOmeroGroup(g.id)
+    if g.id < 3 or "public" in g.name:   #this is important because i am not going to add tags to system, guest group and also not to any public group
+        continue
 
     data = []
 
