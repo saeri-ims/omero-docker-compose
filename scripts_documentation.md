@@ -23,7 +23,7 @@ The scripts it allows to:
 * add a postfix to the image name
 * replace the old name with a new name
 
-![](/home/warrah/Pictures/rename_replace_py.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/rename_replace_py.png)
 
 NOTE:
 It is worth mentioning that the change of the file names is only visual and not real. In terms that the original file name of the imported image is NOT changed. What is changed is how the name appears in OMERO web.
@@ -38,31 +38,31 @@ The script was written based on users request to select images and have a list r
 The script allows to save image name and image path (before being imported to OMERO and within OMERO server) to a csv file that is meant to be saved on a local directory.
 
 
-![](/home/warrah/Pictures/save_filename_AND_path.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/save_filename_AND_path.png)
 
 
 NOTE:
 For opening the csv file in excel or libre office, consider that the csv file is **space delimited**. The first column is the image name, the second refers to where the image has been imported FROM, the third is the reference on OMERO server of the user who imported the image and the date of import.
 
-![](/home/warrah/Pictures/csv_file_path_names.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/csv_file_path_names.png)
 
 __*save_image_name_to_csv.py*__
 
 This script is the simplified version of the script above as it takes ony the image name and save it to the csv file.
 
-![](/home/warrah/Pictures/save_image_names_only.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/save_image_names_only.png)
 
 Here how it looks the csv file once opened in excel or libeoffice
 
-![](/home/warrah/Pictures/image_names_csv.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/image_names_csv.png)
 
 CONSIDERATION: both scripts result not only in the creation of a csv file but also in the creation of an attachment (first icon) in the figure below
 
-![](/home/warrah/Pictures/selected_images_saved_csvfile.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/selected_images_saved_csvfile.png)
 
 **The attachment is created only for first image selected** and can be found by clicking on attachment in the right handside panel
 
-![](/home/warrah/Pictures/annotation_from_image_names_and_paths.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/annotation_from_image_names_and_paths.png)
 
 
 
@@ -86,11 +86,11 @@ The script allows to input two key and values to the selected dataset(s). If the
 
 **BEFORE RUNNING THE SCRIPT**
 
-![](/home/warrah/Pictures/before_kv_script.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/before_kv_script.png)
 
 **AFTER RUNNING THE SCRIPT**
 
-![](/home/warrah/Pictures/after_kv_script.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/after_kv_script.png)
 
 NOTE:
 the "merge" function works in a way that at the end of each KVpairs creation, there is only one list instead of multiple lists.
@@ -99,18 +99,18 @@ __*add key and values to a dataset from csv.py*__
 
 The script assumes that a csv file has been attached to the selected dataset and that is activated (see below).
 
-![](/home/warrah/Pictures/attach_metadata_csv.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/attach_metadata_csv.png)
 
 The csv file needs to comprise of two columns: column "A" will be converted into "KEYS", while column "B" is converted into "VALUES".
 
-![](/home/warrah/Pictures/metadata_table_format.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/metadata_table_format.png)
 
 NOTE:
 the text in column "B" requires to be in one row. Text on multiple rows will not be accepted and the script will return a mistake.
 
 The resulting csv import is displayed here below
 
-![](/home/warrah/Pictures/results_metadata_in_KVpairs.png)
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/results_metadata_in_KVpairs.png)
 
 **IMPORTANT: if the script add 2 keys and values to a dataset and merge.py is run again, all the KVpairs will be merged together. IS THERE A WAY TO AVOID IT?**
 
@@ -149,21 +149,54 @@ The main concepts are:
 
 Although some of the scripts can be run in isolation, it is strongly advised to follow the specific **workflow** described in the points below.
 
-1. Sysadim prepares a list of common tags (e.g. place name, months names, years, species names/genus etc).
+1. Sysadim prepares a list of common tags (e.g. place name, months names, years, species names/genus etc). The file comprises of two columns: tag_name and description
+(the latter can be blank)
 
-2. Sysadim uploads the tags to OMERO via a script *add_tags_to_MANYgroups_from_ONEcsv.py*. NOTE that if the tags to be added are specific to one group then:
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/common_tag_list_csv.png)
 
-   2a. Sysadmin need to create a project called TAG in the groups
 
-   2b. Sysadmin will attach the csv file to this project and activate it
+2. Sysadim attach the csv file in the TAG project created in his/her own admin group. Activate the attachment (see figure below), and run the script *add_tags_to_MANYgroups_from_ONEcsv.py*.
 
-   2c. Sysadmin will run the script *add_tags_from_csv.py*
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/common_tag_list.png)
+
+The new added tags can be displayed by clicking on the "tags" tab
+
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/tags_tab.png)
+
+To check if the tags appear in all the groups, just change group name and list the tags by clicking in the tags tab.
+
+**NOTE: if the tags to be added are specific to one group then:**
+
+    2a. Sysadmin will create a project called TAG in the specific group
+
+    2b. Sysadmin will attach the csv file to this project and activate it
+
+    2c. Sysadmin will run the script *add_tags_from_csv.py*
 
 
 3. The likelihood that a user add a tag because the tag is not in the list is very high. Hence the script *check_tag_ownership.py* is run every night to detect new tags that do not belong to the sysadmin. The result of the script is a csv file in which collects tag_name, tag_id and tag_owner.
 
-4. Sysadmin reads the csv file and make changes to the tag names (if necessary, e.g. there is a typo) and add a new column to the csv file called new_tag_name. The csv file is then attached to the project TAG within the group. [check this]
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/check_tag_ownership.png)
 
-5. Sysadmin runs the script *change_tag_ownership.py* which takes the csv file corrected by sysadmin and makes the necessary changes to both tag namse and tag owner. The result of the script is that all the tags will belong to sysadmin.
 
-6. There is a chance that by running the above script, tags can be duplicated. To overcome this problem Sysadmin needs to run the script *merge_tags.py* which is specific to images only and *merge_tags_for_all_objects.py* which works across projects, datasets and images. [need to test all the workflow]
+The file is then saved in the local directory by the sysadmin and once opened it looks like this:
+
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/tags_tobe_checked_csv.png)
+
+The sysadmin can understand who are the tag owners by looking at the user name table (click on the admin tab)
+
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/users_list.png)
+
+
+4. Sysadmin reads the csv file and make changes to the tag names (if necessary, e.g. there is a typo) and add a new column to the csv file called new_tag_name. The csv file is then attached to the project TAG within the admin group.
+
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/admin_group_attachment_list.png)
+
+The tags_changed_owners-DATE.csv needs to be activated.
+
+5. Sysadmin runs the script *change_tag_ownership.py* which takes the csv file corrected by sysadmin and makes the necessary changes to both tag names and tag owner. The result of the script is that all the tags will belong to sysadmin.
+
+![](/home/warrah/omero-docker-compose/scripts_documentation/pictures/change_ownership.png)
+
+
+6. There is a chance that by running the above script, tags can be duplicated. To overcome this problem Sysadmin needs to run the script *merge_tags.py* which is specific to images only and *merge_tags_for_all_objects.py* which works across projects, datasets and images. [the merge scripts require further tests]
