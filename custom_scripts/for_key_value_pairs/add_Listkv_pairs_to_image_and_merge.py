@@ -38,7 +38,7 @@ import os
 # this script only takes Images
 data_types = [rstring('Image')]
 client = scripts.client(
-    "add_keys_and_values_to_a_dataset.py",
+    "add_Listkey_values_to_an_image_and_merge.py",
     ("Customised script for adding a list of key_values pairs to selected images"),
     # first parameter
     scripts.String(
