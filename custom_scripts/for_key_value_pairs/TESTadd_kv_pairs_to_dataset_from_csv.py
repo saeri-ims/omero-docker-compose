@@ -40,7 +40,7 @@ import csv
 data_types = [rstring('Dataset')]
 client = scripts.client(
     "add_keys_and_values_to_a_dataset_from_csv.py",
-    ("Customised script for adding key_values pairs to a dataset from imported csv"),
+    ("Customised script for adding key_values pairs to a dataset from imported csv. Note that the kvpairs will not be editable afterwards."),
     # first parameter
     scripts.String(
         "Data_Type", grouping="1", optional=False, values=data_types, default="Dataset"),
@@ -58,7 +58,7 @@ print script_params
 
 # Define namespace to not allow editing in Insight & web
 
-namespace = "metadata.from.csv"
+namespace = "metadatafile.from.csv"
 
 # get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
