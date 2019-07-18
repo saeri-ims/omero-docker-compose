@@ -21,7 +21,7 @@ FOR TRAINING PURPOSES ONLY!
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
 from omero.gateway import BlitzGateway, MapAnnotationWrapper
-from omero.constants.metadata import NSCLIENTMAPANNOTATION
+#from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
 import omero
 
@@ -51,7 +51,7 @@ conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
 print script_params
 
-namespace = NSCLIENTMAPANNOTATION
+namespace = "kvpairs.from.tags.per.selected.images"
 
 
 
