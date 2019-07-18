@@ -60,7 +60,7 @@ for g in conn.getObjects("ExperimenterGroup"):
 
     for tag in conn.getObjects("TagAnnotation"):
         owner = tag.getDetails().owner.id.val
-        print tag.textValue, owner
+        #print tag.textValue, owner
         tags.append([tag.textValue, str(tag.id), str(owner)])
 
     #sort the tags in descending order to allow to see duplicates
