@@ -45,7 +45,7 @@ client = scripts.client(
     # second parameter
     scripts.List("IDs", grouping="2", optional=False).ofType(rlong(0)),
     # third parameter
-    scripts.String("File_Annotation", grouping="3", default=""),
+    scripts.String("Namespace_text", grouping="3", default=""),
     #scripts.Long("File_Annotation", grouping="3", default=""),
 
 )
@@ -56,39 +56,21 @@ print script_params
 
 # Use 'client' namespace to allow editing in Insight & web
 
-namespace = NSCLIENTMAPANNOTATION
+#namespace = NSCLIENTMAPANNOTATION
 
 # get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
-
-file_id = script_params["File_Annotation"]
-file_ann = conn.getObject("FileAnnotation", file_id)
-csv_text = "".join(list(file_ann.getFileInChunks()))
-print csv_text
-lines = csv_text.split("\n")
-print lines
-data = []
-
-for l in lines:
-    kv = l.split(",", 1)
-    print kv
-    if len(kv) == 2:
-        data.append(kv)
-    elif len(kv) == 1:
-        data.append([kv[0], ""])
-
-# data = [l.split(",") for l in lines]
-
-
-
-# only link a client map annotation to a single object
+ns = script_params["Namespace_text"]
+file_ns = conn.getObject("Namespace_text", ns)
 
 for dataset in conn.getObjects("Dataset", ids):
-    map_ann = omero.gateway.MapAnnotationWrapper(conn)
-    map_ann.setNs(namespace)
-    map_ann.setValue(data)
-    map_ann.save()
-    dataset.linkAnnotation(map_ann)
+
+    ann_ids = []
+    for a in dataset.listAnnotations(ns):
+        ann_ids.append(a.id)
+
+    conn.deleteObjects('Annotation', ann_ids, wait=True)
+
 
 
 
