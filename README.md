@@ -1,4 +1,4 @@
-# ONERO docker-compose
+# OMERO docker-compose
 
 - Start: `docker-compose up -d`
 - View logs: `docker-compose logs -f`

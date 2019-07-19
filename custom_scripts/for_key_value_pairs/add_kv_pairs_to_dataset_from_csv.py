@@ -21,7 +21,7 @@ FOR TRAINING PURPOSES ONLY!
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
 from omero.gateway import BlitzGateway, MapAnnotationWrapper
-from omero.constants.metadata import NSCLIENTMAPANNOTATION
+#from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
 import omero
 
@@ -40,7 +40,7 @@ import csv
 data_types = [rstring('Dataset')]
 client = scripts.client(
     "add_keys_and_values_to_a_dataset_from_csv.py",
-    ("Customised script for adding key_values pairs to a dataset from imported csv"),
+    ("Customised script for adding key_values pairs to a dataset from imported csv. Note that the kvpairs will not be editable afterwards."),
     # first parameter
     scripts.String(
         "Data_Type", grouping="1", optional=False, values=data_types, default="Dataset"),
@@ -55,14 +55,20 @@ conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
 print script_params
 
+
+# Define namespace to not allow editing in Insight & web
+
+namespace = "metadatafile.from.csv"
+
+# otherwise if kvpairs want to be kept editable
 # Use 'client' namespace to allow editing in Insight & web
 
-namespace = NSCLIENTMAPANNOTATION
+#namespace = NSCLIENTMAPANNOTATION
 
 # get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
 
-file_id = script_params["File_Annotation"]  #question why not simply file_id= File_Annotation?
+file_id = script_params["File_Annotation"]
 file_ann = conn.getObject("FileAnnotation", file_id)
 csv_text = "".join(list(file_ann.getFileInChunks()))
 print csv_text
