@@ -21,12 +21,12 @@ FOR TRAINING PURPOSES ONLY!
 # This script takes an Image ID as a parameter from the scripting service.
 from omero.rtypes import rlong, rstring, unwrap, robject
 from omero.gateway import BlitzGateway, MapAnnotationWrapper
-from omero.constants.metadata import NSCLIENTMAPANNOTATION
+#from omero.constants.metadata import NSCLIENTMAPANNOTATION
 import omero.scripts as scripts
 import omero
 
 import os
-import csv
+#import csv
 
 # Script definition
 
@@ -61,16 +61,32 @@ print script_params
 # get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
 ns = script_params["Namespace_text"]
-file_ns = conn.getObject("Namespace_text", ns)
+#file_ns = conn.getObject("Namespace")  #is this necessary?
+list_datasets = conn.getObjects("Dataset", ids)
 
-for dataset in conn.getObjects("Dataset", ids):
-
+for dataset in list_datasets:
+    print dataset.getId()
     ann_ids = []
+    given_type = None
+    if anntype == "map":
+        given_type = omero.model.MapAnnotationI
+    #if anntype == "file":
+        #given_type = omero.model.FileAnnotationI
+    if ns == "none":
+        ns = None
+    for image in dataset.listChildren():
+        for a in image.listAnnotations(ns):
+            if a.OMERO_TYPE == given_type:
+                print a.getId(), a.OMERO_TYPE, a.ns
+                ann_ids.append(a.id)
+    # Delete the annotations link to the dataset
     for a in dataset.listAnnotations(ns):
-        ann_ids.append(a.id)
-
-    conn.deleteObjects('Annotation', ann_ids, wait=True)
-
+        if a.OMERO_TYPE == given_type:
+            print a.getId(), a.OMERO_TYPE, a.ns
+            ann_ids.append(a.id)
+    if len(ann_ids) > 0:
+        print "Deleting %s annotations..." % len(ann_ids)
+        conn.deleteObjects('Annotation', ann_ids, wait=True)
 
 
 
