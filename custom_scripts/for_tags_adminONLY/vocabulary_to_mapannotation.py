@@ -88,6 +88,7 @@ for l in lines[1:]:
     key_rows[key] = cols   #in this way i get all the columns in the csv file
     #if i want to specify which columns to bring into the map annotation i should run the code below
     #key_rows[key] = [cols[0], cols[1], cols[2]]
+print key_rows.keys()
 
 #Run the script from a project and look at all the elements within it. I can also attach the script to a single dataset or image and thanks
 #to the loop below i should be able to get the action i required
@@ -129,12 +130,15 @@ for i in images:
 
     for kv in kvpairs:
         key = kv[1]
+        print key
         # logic statement: if key value matches with the value in the csv file
         if key in key_rows:
             values = key_rows[key]
        #create the list with the matching values
             for col_name, value in zip(col_names, values):
                 new_values.append([col_name, value])
+        else:
+            print "key not found", key
 
 
     if len(new_values) == 0:
