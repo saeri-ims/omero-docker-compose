@@ -75,8 +75,8 @@ A set of scripts have been written to deal with the creation of Key-Value pairs 
 * adding two KVpairs to an image from manual entry
 * adding a list of KVpairs to an image from manual entry
 * adding KVpairs to an image from csv
-* delete KVpairs from a dataset and image (TBW)
-* export KVpairs from an image to csv file (TBW)
+* delete KVpairs from a dataset and image (done)
+* export KVpairs from an image to csv file (EvanHuis)
 
 __*add 2 keys and values to a dataset and merge.py*__
 
@@ -112,23 +112,29 @@ The resulting csv import is displayed here below
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/results_metadata_in_KVpairs.png)
 
-**IMPORTANT: if the script add 2 keys and values to a dataset and merge.py is run again, all the KVpairs will be merged together. IS THERE A WAY TO AVOID IT?**
+**IMPORTANT:** the script uses a namespace which differs from the CLIENT. It means that the imported kvpairs are not editable. The reason is that the script has been originally thought for importing the metadata ISO19115 and we didn't want to merge the metadata with other kvpairs when running the merge.py script. However, by modifying the name space the users can change the behavious of the script.
 
 __*remove key and values from a dataset and image.py*__
 
-The script allows the users to delete the KVpairs that have been created for images and datasets.
+The script allows the users to delete the annotations (KVpairs mainly but tags are also possible if the namespace is known) that have been created for images and datasets by selecting the namespace and by deciding if they want to delete the annotation on the selected object or on the objects contained by the selected object (the so called children).
 
-The script takes both, images and datasets which need to be selected before running the script.
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/remove_annotation_bynamespace.png)
 
-THIS SCRIPT NEEDS TO BE WRITTEN
 
-__*export key and values from a dataset and image to a csv file.py*__
+__*export key and values from images within a dataset to a csv file.py*__
 
-The script allows the users to export the KVpairs from images and datasets to a csv file.
+The script has been taken from Even Huis's [repository](https://github.com/evenhuis/omero-user-scripts/tree/inplaceKV) and allows the users to export the KVpairs from images within datasets to a csv file.
 
-The script takes both, images and datasets which need to be selected before running the script.
+Before running, the script requires the selection of a database (more than one is also permitted) then all the images nested in the databases will be detected and their kvpairs copied in a csv file.
 
-THIS SCRIPT NEEDS TO BE WRITTEN
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/export_kvpairs_tocsv.png)
+
+The csv file is attached to the selected dataset and is named using this syntax:
+
+datasetNAME_metadata_out.csv
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/metadata_out_name.png)
 
 ### Working with tags:
 
@@ -155,7 +161,10 @@ Although some of the scripts can be run in isolation, it is strongly advised to 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/common_tag_list_csv.png)
 
 
-2. Sysadim attach the csv file in the TAG project created in his/her own admin group. Activate the attachment (see figure below), and run the script *add_tags_to_MANYgroups_from_ONEcsv.py*.
+**Something to bear in mind:**
+in a filename, space _ - . or other symbol will be considered by OMERO as a token. It means that a tag seabirds monitoring or seabirds_monitoring in reality comprises of two searchable items: "seabirds" and "monitoring"  
+
+2. Sysadim attach the csv file in the TAG project created in his/her own admin group. Activate the attachment (see figure below), and run the script __add_tags_to_MANYgroups_from_ONEcsv.py*.__
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/common_tag_list.png)
 
@@ -171,10 +180,10 @@ To check if the tags appear in all the groups, just change group name and list t
 
     2b. Sysadmin will attach the csv file to this project and activate it
 
-    2c. Sysadmin will run the script *add_tags_from_csv.py*
+    2c. Sysadmin will run the script __*add_tags_from_csv.py*__
 
 
-3. The likelihood that a user add a tag because the tag is not in the list is very high. Hence the script *check_tag_ownership.py* is run every night to detect new tags that do not belong to the sysadmin. The result of the script is a csv file in which collects tag_name, tag_id and tag_owner.
+3. The likelihood that a user add a tag because the tag is not in the list is very high. Hence the script __*check_tag_ownership.py*__ is run every night to detect new tags that do not belong to the sysadmin. The result of the script is a csv file in which collects tag_name, tag_id and tag_owner.
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/check_tag_ownership.png)
 
@@ -194,9 +203,101 @@ The sysadmin can understand who are the tag owners by looking at the user name t
 
 The tags_changed_owners-DATE.csv needs to be activated.
 
-5. Sysadmin runs the script *change_tag_ownership.py* which takes the csv file corrected by sysadmin and makes the necessary changes to both tag names and tag owner. The result of the script is that all the tags will belong to sysadmin.
+5. Sysadmin runs the script __*change_tag_ownership.py*__ which takes the csv file corrected by sysadmin and makes the necessary changes to both tag names and tag owner. The result of the script is that all the tags will belong to sysadmin.
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/change_ownership.png)
 
 
-6. There is a chance that by running the above script, tags can be duplicated. To overcome this problem Sysadmin needs to run the script *merge_tags.py* which is specific to images only and *merge_tags_for_all_objects.py* which works across projects, datasets and images. [the merge scripts require further tests]
+6. There is a chance that by running the above script, tags can be duplicated. To overcome this problem Sysadmin needs to run the script __*merge_tags.py*__ which is specific to merging tags per images only and __*merge_tags_for_all_objects.py*__ which works across projects, datasets and images and will merge tags for all these objects.
+
+**Note:** merging tags in reality means that we bring images linked to tags with the same name under only one tag. In our system the tags are all owned by the same person hence this "merging" operation is possible.
+
+**Important:** The script recognises only tags that are written exactly in the same way. For instance, two tags linked to different images like
+
+satellite imagery
+satelliteImagery
+
+will not be merged.
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/not_matching_tags.png)
+
+So, when the sysadmin reads the csv file (see point 4 in workflow) and makes the changes to the tag_names, he/she needs to be aware of all the tags already used, in order to avoid confusion.
+
+**Important:** Since the number of tags used in OMERO is likely to grow esponentially, it is suggested that sysadmin prints out all the tags he/she owns from all the groups he/she belongs to (basically all, but avoid public group) in OMERO and keep the file handy when he/she renames the tags from other users. **[a script should be written for exporting all tags belonging to sysadmin]**
+
+### Working with controlled vocabulary:
+
+Controlled vocabulary is an organized list of words and phrases, or notation systems, that are used to initially tag content, and then to find it through navigation or search.
+
+The type of controlled vocabulary we adopted for OMERO is hierachical and it goes from broader terms to narrower terms. Taxonomy is a good example that explains this hierarchy: we start with a large kingdom, e.g. Animalia and we end to the single species, e.g. Thalassarche melanoprhis.
+
+We introduced the controlled vocabulary because it helps ensuring consistency, dealing with objects that are "hierarchical", and reducing ambiguity inherent in language where the same concept can be given different names.
+
+Adopting a controlled vocabulary and maintaining the single tags it allows to keep the benefits from both approaches to tagging objects.
+
+There are two scripts that run the controlled vocabulary:
+
+1. __*copy_tags_2kvpairs_per_selected_objects.py*__
+
+2. __*vocabulary to mapannotation.py*__
+
+
+**How do the scripts work**
+
+Sysadmin and the users will need to work out a hierarchy for the tags according to the images that the users need to add to OMERO.
+
+The script takes csv files that have a structure similar to that one depicted below (as far as species names are concerned)
+
+ ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/controlled_vocabulary.png)
+
+All the headers in the table above will be converted into keys in the KVpairs section. While the rows will be the corresponding values.
+
+We first need to ensure that the tag is already in the KVpairs section and to do so we run the __*copy_tags_2kvpairs_per_selected_objects.py*__
+
+This script copy the tags for the selected objects and for the children in the selected object to the KVpairs section and it uses the specific namespace **"kvpairs.from.tags.script"**. The namespace makes the KVpairs not editable but provides a hint to the users and the sysadmin about the script used for generating the KVpairs section.
+
+The csv file we want to import acts as a look-up table where the tags in the OMERO "kvpairs.from.tags.script" is looked up and, if found, the values in the matching row are copied into OMERO KVpairs section.
+
+After the __*copy_tags_2kvpairs_per_selected_objects.py*__ is run then it is the turn of __*vocabulary to mapannotation.py*__
+
+**Important:** It is necessary to attach the csv file to the project and activate it.
+
+The result is depicted below:
+
+ ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/vocabulary_to_mapannotation.png)
+
+ As visible in the image above, the script uses another namespace which again will help the users to understand from which script and operation the KVpairs have been created.
+
+ Having a controlled vocabulary will allow to retrieve all images that are falling within the broader classes in the hierarchy.
+
+The figure below shows how to retrieve all images tagged with the species names which belong to the same family or to more families
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/search_multiple_families.png)
+
+
+### Preparing data for the wider public:
+
+A very good advantage of OMERO is that the catalogue allows sharing data not only within the same working group but also with the general public.
+
+Data (images) that are targeted to become publicly available need to be "moved" (there is not such a copy/duplication of images in OMERO) to a public group.
+Moving images means that physically the images are removed from one group and placed in another, with different level of permissions and accessibility.
+
+Sysadmin will need to create a public group (e.g. public_domain) and make it read only. Then all the users will be made members of this group (this to allow them to move the files).This operation is performed by running the script called __*select_all_users_move_to_public_group.py*__ which makes a list of all the users and then adds them to the public group.  
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/for_admin_only.png)
+
+**Important:** in order to move data from a group to another the users need to right click on the image/dataset/project and click on move to group
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/move_to_group.png)
+
+A new window pops up with the request to indicate the name of the group (where to move the data to) and the dataset. **It is worth noticing that a user can only move data to a group to which he/she is member of.** At this point the user clicks on new and types the name of a new dataset. If the user is moving an entire dataset, he/she can write the same name of the dataset that he/she is moving.
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/move_to_group_popup.png)
+
+If a name is not provided, the data will be stored in the orphaned images folder.
+
+Data in the public folder can be made available to the public either by adding a generic public user to the group (this i task of sysadmin) OR by sharing the link with the data.
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/share_link_with_public_users.png)
+
+**Reminder:** once the link is shared the user won't have more control on what happens with the link (e.g. who gets the link can re-share it without notifying this to the owner of the image).
