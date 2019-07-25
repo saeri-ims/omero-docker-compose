@@ -95,9 +95,9 @@ The script allows to input two key and values to the selected dataset(s). If the
 NOTE:
 the "merge" function works in a way that at the end of each KVpairs creation, there is only one list instead of multiple lists.
 
-__*add key and values to a dataset from csv.py*__
+__*add_metadata19115_to_kvpairs_in_dataset.py*__
 
-The script assumes that a csv file has been attached to the selected dataset and that is activated (see below).
+The script assumes that a csv file containing a single metadata form (ISO19115) has been attached to the selected dataset and that is activated (see below).
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/attach_metadata_csv.png)
 
@@ -105,8 +105,8 @@ The csv file needs to comprise of two columns: column "A" will be converted into
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/metadata_table_format.png)
 
-NOTE:
-the text in column "B" requires to be in one row. Text on multiple rows will not be accepted and the script will return a mistake.
+**NOTE:**
+In the csv file, the text in column "B" requires to be in one row. Text on multiple rows will not be accepted and the script will return a mistake.
 
 The resulting csv import is displayed here below
 
@@ -114,7 +114,11 @@ The resulting csv import is displayed here below
 
 **IMPORTANT:** the script uses a namespace which differs from the CLIENT. It means that the imported kvpairs are not editable. The reason is that the script has been originally thought for importing the metadata ISO19115 and we didn't want to merge the metadata with other kvpairs when running the merge.py script. However, by modifying the name space the users can change the behavious of the script.
 
-__*remove key and values from a dataset and image.py*__
+__*add_kv_pairs_from_csv.py*__
+
+ADD SOME TEXT HERE. The script i wrote doens't throw a mistake but it doesn't do what i want. do not create object list.
+
+__*delete_annotations_by_namespace.py*__
 
 The script allows the users to delete the annotations (KVpairs mainly but tags are also possible if the namespace is known) that have been created for images and datasets by selecting the namespace and by deciding if they want to delete the annotation on the selected object or on the objects contained by the selected object (the so called children).
 
