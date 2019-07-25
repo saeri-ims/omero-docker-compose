@@ -63,45 +63,25 @@ namespace = "kvpairs.from.tags.script"
 
 # get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
-ns = script_params["Namespace_text"]
-ns = ns.strip()
-#file_ns = conn.getObject("Namespace")  #is this necessary?
 objects = conn.getObjects(data_type, ids)
 
-#crete the list of annotation for the image
-to_delete = []
+#create the list of the objects (Datasets, images or both)
+object_list = []
 
 #loop for looking at data in project/datasets and images
 if data_type == 'Dataset':
     for ds in objects:
         if copy_children:
-            to_delete.extend(list(ds.listChildren()))
+            object_list.extend(list(ds.listChildren()))
         if copy_self:
-            to_delete.append(ds)
+            object_list.append(ds)
 else:
-    to_delete = objects
+    object_list = objects
 
-
-for obj in to_delete:
-    print obj.getId()
-    ann_ids = []
-    if ns == "none":
-        ns = None
-    for a in obj.listAnnotations(ns):
-        #if a.OMERO_TYPE == given_type:
-        print a.getId(), a.OMERO_TYPE, a.ns
-        ann_ids.append(a.id)
-    if len(ann_ids) > 0:
-        print "Deleting %s annotations..." % len(ann_ids)
-        conn.deleteObjects('Annotation', ann_ids, wait=True)
-
-################
-for d in datasets:
-    print d.name
+for obj in object_list:
 
     tag_values = []
-
-    for ann in d.listAnnotations():
+    for ann in obj.listAnnotations():
         if isinstance(ann, omero.gateway.TagAnnotationWrapper):
             tag_values.append(ann.textValue)
 
@@ -116,7 +96,7 @@ for d in datasets:
 
 
     to_delete = []
-    for ann in d.listAnnotations(ns=namespace):
+    for ann in obj.listAnnotations(ns=namespace):
         kv = ann.getValue()
         to_delete.append(ann.id)
 
@@ -125,7 +105,7 @@ for d in datasets:
     map_ann.setNs(namespace)
     map_ann.setValue(key_values)
     map_ann.save()
-    d.linkAnnotation(map_ann)
+    obj.linkAnnotation(map_ann)
 
     if len(to_delete) > 0:
         conn.deleteObjects('Annotation', to_delete)

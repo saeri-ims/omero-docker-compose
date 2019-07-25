@@ -38,7 +38,7 @@ import os
 data_types = [rstring('Project'), rstring('Dataset'),rstring('Image')]
 client = scripts.client(
     "remove_annotations_from_all_objects.py",
-    ("Customised script for removing all annotations from all objects"),
+    ("Customised script for removing annotations (kvpairs or tags) from selected objects based on the namespace given"),
     # first parameter
     scripts.String(
         "Data_Type", grouping="1", optional=False, values=data_types, default="Dataset"),
@@ -70,28 +70,29 @@ ns = ns.strip()
 #file_ns = conn.getObject("Namespace")  #is this necessary?
 objects = conn.getObjects(data_type, ids)
 
-#crete the list of annotation for the image
-to_delete = []
+
+#create the list of the objects (Datasets, images or both)
+object_list = []
 
 #loop for looking at data in project/datasets and images
 if data_type == 'Project':
     for p in objects:
         if delete_children:
             for ds in p.listChildren():
-                to_delete.extend(list(ds.listChildren()))
+                object_list.extend(list(ds.listChildren()))
         if delete_self:
-            to_delete.append(ds)
+            object_list.append(ds)
 elif data_type == 'Dataset':
     for ds in objects:
         if delete_children:
-            to_delete.extend(list(ds.listChildren()))
+            object_list.extend(list(ds.listChildren()))
         if delete_self:
-            to_delete.append(ds)
+            object_list.append(ds)
 else:
-    to_delete = objects
+    object_list = objects
 
 
-for obj in to_delete:
+for obj in object_list:
     print obj.getId()
     ann_ids = []
     if ns == "none":
