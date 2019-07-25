@@ -79,7 +79,7 @@ else:
     object_list = objects
 
 for obj in object_list:
-
+    owner = obj.getOwner().getName()
     tag_values = []
     for ann in obj.listAnnotations():
         if isinstance(ann, omero.gateway.TagAnnotationWrapper):
@@ -100,12 +100,13 @@ for obj in object_list:
         kv = ann.getValue()
         to_delete.append(ann.id)
 
-
-    map_ann = omero.gateway.MapAnnotationWrapper(conn)
+    suconn = conn.suConn(owner)
+    map_ann = omero.gateway.MapAnnotationWrapper(suconn)
     map_ann.setNs(namespace)
     map_ann.setValue(key_values)
     map_ann.save()
     obj.linkAnnotation(map_ann)
+    suconn.close()
 
     if len(to_delete) > 0:
         conn.deleteObjects('Annotation', to_delete)
