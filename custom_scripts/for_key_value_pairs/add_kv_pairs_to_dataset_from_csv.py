@@ -37,35 +37,43 @@ import csv
 # populated with the currently selected Image(s)
 
 # this script only takes Datasets
-data_types = [rstring('Dataset')]
+data_types = [rstring('Dataset'),rstring('Image')]
 client = scripts.client(
-    "add_keys_and_values_to_a_dataset_from_csv.py",
-    ("Customised script for adding key_values pairs to a dataset from imported csv. Note that the kvpairs will not be editable afterwards."),
+    "add_kv_pairs_from_csv_per_selected_objects.py",
+    ("Customised script for adding key_values pairs to the selected objects (datasets and/or images) from imported csv. Note that the kvpairs will not be editable afterwards."),
     # first parameter
     scripts.String(
         "Data_Type", grouping="1", optional=False, values=data_types, default="Dataset"),
     # second parameter
     scripts.List("IDs", grouping="2", optional=False).ofType(rlong(0)),
+    # third parameter
     scripts.String("File_Annotation", grouping="3", default=""),
     #scripts.Long("File_Annotation", grouping="3", default=""),
+    # fourth parameter
+    scripts.Bool("Add_kvpairs_to_object", grouping="4", description="object is the selected item", default=True),
+    # fifth parameter
+    scripts.Bool("Add_kvpairs_to_children", grouping="5", description="children is the list of objects within the selected item: e.g. images within selected dataset"),
 
 )
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
+add_self = script_params.get('Add_tags_to_object', False)
+add_children = script_params.get('Add_tags_to_children', False)
+data_type = script_params['Data_Type']
 print script_params
 
 
 # Define namespace to not allow editing in Insight & web
 
-namespace = "metadatafile.from.csv"
+namespace = "kvpairs.from.csv"
 
 # otherwise if kvpairs want to be kept editable
 # Use 'client' namespace to allow editing in Insight & web
 
 #namespace = NSCLIENTMAPANNOTATION
 
-# get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
+# get the 'IDs' parameter (will match the id of the selected object to which the csv file has been attached)
 ids = unwrap(client.getInput("IDs"))
 
 file_id = script_params["File_Annotation"]
@@ -74,23 +82,44 @@ csv_text = "".join(list(file_ann.getFileInChunks()))
 print csv_text
 lines = csv_text.split("\n")
 print lines
-data = []
-
-for l in lines:
-    kv = l.split(",", 1)
-    print kv
-    if len(kv) == 2:
-        data.append(kv)
-    elif len(kv) == 1:
-        data.append([kv[0], ""])
-
-# data = [l.split(",") for l in lines]
 
 
+#connect to the object
+objects = conn.getObjects(data_type, ids)
+print "objects", objects
 
-# only link a client map annotation to a single object
+#create the list of the objects (Datasets, images or both)
+object_list = []
 
-for dataset in conn.getObjects("Dataset", ids):
+#loop for looking at data in project/datasets and images
+if data_type == 'Dataset':
+    for ds in objects:
+        if add_children:
+            object_list.extend(list(ds.listChildren()))
+        if add_self:
+            object_list.append(ds)
+else:
+    object_list = objects
+
+print object_list
+
+for obj in object_list:
+
+    data = []
+
+    for l in lines:
+        kv = l.split(",", 1)
+        print kv
+        if len(kv) == 2:
+            data.append(kv)
+        elif len(kv) == 1:
+            data.append([kv[0], ""])
+
+    print "list data", data
+
+
+
+#for dataset in conn.getObjects("Dataset", ids):
     map_ann = omero.gateway.MapAnnotationWrapper(conn)
     map_ann.setNs(namespace)
     map_ann.setValue(data)
