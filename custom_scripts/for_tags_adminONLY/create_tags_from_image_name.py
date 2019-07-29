@@ -75,11 +75,12 @@ images = conn.getObjects("Image", ids)
     #if len(cols) < 1:
         #continue
 for i in images:
-	image_name = i.name
-#print "this is the image name", image_name
+    image_name = i.name
+    print "image name is", image_name
     #text = cols[name_index]
 
     tags = list(conn.getObjects("TagAnnotation", attributes={"textValue": image_name}))
+    print "the tag is", tags
     if len(tags) > 0:
         print "Tag '%s' already exists" % image_name
         continue
