@@ -80,7 +80,7 @@ else:
 
 for obj in object_list:
 
-    owner = obj.getOwner().getName()
+    owner = obj.getOwner().getName() #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
     tag_values = []
     for ann in obj.listAnnotations():
         if isinstance(ann, omero.gateway.TagAnnotationWrapper):
@@ -102,14 +102,14 @@ for obj in object_list:
         to_delete.append(ann.id)
 
 
-    #map_ann = omero.gateway.MapAnnotationWrapper(conn)
-    suconn = conn.suConn(owner)
+    #map_ann = omero.gateway.MapAnnotationWrapper(conn)   #this line has been commented and superseeded by the line below in order to make the owner of the image also the owner of the new kvpairs
+    suconn = conn.suConn(owner)  #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
     map_ann = omero.gateway.MapAnnotationWrapper(suconn)
     map_ann.setNs(namespace)
     map_ann.setValue(key_values)
     map_ann.save()
     obj.linkAnnotation(map_ann)
-    suconn.close()
+    suconn.close()    #this line is necessary to "close" also the connection as "other user" as the sysadmin is now concluding to operate on behalf of the owner of the image
 
     if len(to_delete) > 0:
         conn.deleteObjects('Annotation', to_delete)
