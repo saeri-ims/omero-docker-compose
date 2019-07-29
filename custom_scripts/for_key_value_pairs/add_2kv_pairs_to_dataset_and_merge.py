@@ -56,21 +56,21 @@ print script_params
 
 namespace = omero.constants.metadata.NSCLIENTMAPANNOTATION
 
-# get the 'IDs' parameter (which we have restricted to 'Image' IDs)
+# get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
-images = conn.getObjects("Dataset", ids)
+datasets = conn.getObjects("Dataset", ids)
 
 first_k = script_params["First_key"]
 first_v = script_params["First_value"]
 second_k = script_params["Second_key"]
 second_v = script_params["Second_value"]
 
-for i in images:
-    print i.name
+for ds in datasets:
+    print ds.name
     key_value_data = []
 
     to_delete = []
-    for ann in i.listAnnotations(ns=namespace):
+    for ann in ds.listAnnotations(ns=namespace):
         kv = ann.getValue()
         key_value_data.extend(kv)
         to_delete.append(ann.id)
@@ -80,7 +80,7 @@ for i in images:
     map_ann.setNs(namespace)
     map_ann.setValue(key_value_data)
     map_ann.save()
-    i.linkAnnotation(map_ann)
+    ds.linkAnnotation(map_ann)
 
     if len(to_delete) > 0:
         conn.deleteObjects('Annotation', to_delete)
