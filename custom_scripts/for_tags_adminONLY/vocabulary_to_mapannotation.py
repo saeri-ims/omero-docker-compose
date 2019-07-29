@@ -53,7 +53,10 @@ client = scripts.client(
     scripts.List(
         "IDs", optional=False, grouping="2",
         description="List of Dataset IDs or Image IDs").ofType(rlong(0)),
-
+    #define the position of the key in the csv file
+    scripts.Int(
+        "Key_position_in_csv", optional=False, grouping="3",
+        description="Indicate the position of the key in the csv table").ofType(rlong(0)),
 
 )
 # we can now create our Blitz Gateway by wrapping the client object
@@ -66,7 +69,7 @@ tags_namespace = "kvpairs.from.tags.script"
 voc_namespace = "adding.kvpairs.from.vocabulary"
 
 # get the 'IDs' parameter of the csv file imported as annotation
-
+key_position = script_params["Key_position_in_csv"]  #this has been added to give the user the opportunity to define the position of the key in the csv file
 file_id = script_params["File_Annotation"]
 file_ann = conn.getObject("FileAnnotation", file_id)
 csv_text = "".join(list(file_ann.getFileInChunks()))
@@ -75,7 +78,7 @@ lines = csv_text.split("\n")
 
 #consider that the csv file has got headers
 col_names = lines[0].split(",")
-key_index = 2
+key_index = key_position   #it was 2
 
 #creating the vocabulary
 key_rows = {}
@@ -155,8 +158,9 @@ for i in images:
 
 
     #delete the previous vkpairs section
-    conn.deleteObjects('Annotation', to_delete)
-
+    #conn.deleteObjects('Annotation', to_delete)
+    if len(to_delete) > 0:
+        conn.deleteObjects('Annotation', to_delete)
 
 
 # Here, we return anything useful the script has produced.
