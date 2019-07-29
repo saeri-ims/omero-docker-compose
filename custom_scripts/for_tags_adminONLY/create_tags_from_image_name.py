@@ -56,39 +56,15 @@ print script_params
 # get the 'IDs' parameter of the Images
 ids = unwrap(client.getInput("IDs"))
 images = conn.getObjects("Image", ids)
-#file_id = script_params["File_Annotation"]
-#file_ann = conn.getObject("FileAnnotation", file_id)
-#csv_text = "".join(list(file_ann.getFileInChunks()))
-#print csv_text
-#lines = csv_text.split("\n")
-#print lines
-#data = []
 
-#col_names = lines[0]
-
-#name_index = 0
-#desc_index = 1
-
-#for l in lines[1:]:
-    #cols = l.split(",")
-    #print cols
-    #if len(cols) < 1:
-        #continue
 for i in images:
     image_name = i.name
     print "image name is", image_name
-    #text = cols[name_index]
 
-    tags = list(conn.getObjects("TagAnnotation", attributes={"textValue": image_name}))
-    print "the tag is", tags
-    if len(tags) > 0:
-        print "Tag '%s' already exists" % image_name
-        continue
     tag_ann = omero.gateway.TagAnnotationWrapper(conn)
     tag_ann.setValue(image_name)
-    #if len(cols) > 1:
-        #tag_ann.setDescription(cols[desc_index])
     tag_ann.save()
+    i.linkAnnotation(tag_ann)  #this is fundamental for actually copying the tag!
 
 
 

@@ -57,8 +57,8 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-add_self = script_params.get('Add_tags_to_object', False)
-add_children = script_params.get('Add_tags_to_children', False)
+add_self = script_params.get('Add_kvpairs_to_object', False)
+add_children = script_params.get('Add_kvpairs_to_children', False)
 data_type = script_params['Data_Type']
 print script_params
 
@@ -105,7 +105,7 @@ print object_list
 for obj in object_list:
 
     owner = obj.getOwner().getName() #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
-    
+
     data = []
     for l in lines:
         kv = l.split(",", 1)
@@ -125,10 +125,11 @@ for obj in object_list:
 #for dataset in conn.getObjects("Dataset", ids):
     #map_ann = omero.gateway.MapAnnotationWrapper(conn) #this line has been commented and superseeded by the line below in order to make the owner of the image also the owner of the new kvpairs
     suconn = conn.suConn(owner)  #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
+    map_ann = omero.gateway.MapAnnotationWrapper(suconn)
     map_ann.setNs(namespace)
     map_ann.setValue(data)
     map_ann.save()
-    dataset.linkAnnotation(map_ann)
+    obj.linkAnnotation(map_ann)
     suconn.close()    #this line is necessary to "close" also the connection as "other user" as the sysadmin is now concluding to operate on behalf of the owner of the image
 
     if len(to_delete) > 0:
