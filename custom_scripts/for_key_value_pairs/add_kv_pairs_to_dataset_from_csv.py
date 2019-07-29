@@ -29,7 +29,6 @@ import os
 import csv
 
 
-
 # Script definition
 
 # Script name, description and 2 parameters are defined here.
@@ -105,8 +104,9 @@ print object_list
 
 for obj in object_list:
 
+    owner = obj.getOwner().getName() #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
+    
     data = []
-
     for l in lines:
         kv = l.split(",", 1)
         print kv
@@ -117,16 +117,22 @@ for obj in object_list:
 
     print "list data", data
 
-
+    to_delete = []
+    for ann in obj.listAnnotations(ns=namespace):
+        kv = ann.getValue()
+        to_delete.append(ann.id)
 
 #for dataset in conn.getObjects("Dataset", ids):
-    map_ann = omero.gateway.MapAnnotationWrapper(conn)
+    #map_ann = omero.gateway.MapAnnotationWrapper(conn) #this line has been commented and superseeded by the line below in order to make the owner of the image also the owner of the new kvpairs
+    suconn = conn.suConn(owner)  #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
     map_ann.setNs(namespace)
     map_ann.setValue(data)
     map_ann.save()
     dataset.linkAnnotation(map_ann)
+    suconn.close()    #this line is necessary to "close" also the connection as "other user" as the sysadmin is now concluding to operate on behalf of the owner of the image
 
-
+    if len(to_delete) > 0:
+        conn.deleteObjects('Annotation', to_delete)
 
 # Return some value(s).
 
