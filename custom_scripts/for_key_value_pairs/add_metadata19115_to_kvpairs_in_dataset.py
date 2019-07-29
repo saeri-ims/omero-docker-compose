@@ -67,36 +67,47 @@ namespace = "metadata19115file.from.csv"
 
 # get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
-
+datasets = conn.getObjects("Dataset", ids)
 file_id = script_params["File_Annotation"]
 file_ann = conn.getObject("FileAnnotation", file_id)
 csv_text = "".join(list(file_ann.getFileInChunks()))
 print "csv text", csv_text
 lines = csv_text.split("\n")
 print "csv lines", lines
-data = []
 
-for l in lines:
-    kv = l.split(",", 1)
-    print "key values", kv
-    if len(kv) == 2:
-        data.append(kv)
-    elif len(kv) == 1:
-        data.append([kv[0], ""])
+for ds in datasets:
+    print "dataset names", ds
 
-# data = [l.split(",") for l in lines]
+    owner = obj.getOwner().getName() #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
+    data = []
+    for l in lines:
+        kv = l.split(",", 1)
+        print "key values", kv
+        if len(kv) == 2:
+            data.append(kv)
+        elif len(kv) == 1:
+            data.append([kv[0], ""])
 
+# create the object list to delete (in our case the annotations with a specific namespace)
+    to_delete = []
+    for ann in ds.listAnnotations(ns=namespace):
+        kv = ann.getValue()
+        to_delete.append(ann.id)
 
 
 # only link a client map annotation to a single object
 
 for dataset in conn.getObjects("Dataset", ids):
-    map_ann = omero.gateway.MapAnnotationWrapper(conn)
+    #map_ann = omero.gateway.MapAnnotationWrapper(conn) #this line has been commented and superseeded by the line below in order to make the owner of the image also the owner of the new kvpairs
+    suconn = conn.suConn(owner)  #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
     map_ann.setNs(namespace)
     map_ann.setValue(data)
     map_ann.save()
     dataset.linkAnnotation(map_ann)
+    suconn.close()    #this line is necessary to "close" also the connection as "other user" as the sysadmin is now concluding to operate on behalf of the owner of the image
 
+    if len(to_delete) > 0:
+        conn.deleteObjects('Annotation', to_delete)
 
 
 # Return some value(s).
