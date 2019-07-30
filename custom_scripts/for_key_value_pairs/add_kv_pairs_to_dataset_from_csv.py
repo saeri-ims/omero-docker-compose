@@ -122,10 +122,9 @@ for obj in object_list:
         kv = ann.getValue()
         to_delete.append(ann.id)
 
-#for dataset in conn.getObjects("Dataset", ids):
-    #map_ann = omero.gateway.MapAnnotationWrapper(conn) #this line has been commented and superseeded by the line below in order to make the owner of the image also the owner of the new kvpairs
+#for dataset in conn.getObjects("Dataset", ids):    
     suconn = conn.suConn(owner)  #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
-    map_ann = omero.gateway.MapAnnotationWrapper(suconn)
+    map_ann = omero.gateway.MapAnnotationWrapper(suconn)  #this line tells that the connection to the Map annotation is done by sysadmin but with the name of the owner of the data
     map_ann.setNs(namespace)
     map_ann.setValue(data)
     map_ann.save()
