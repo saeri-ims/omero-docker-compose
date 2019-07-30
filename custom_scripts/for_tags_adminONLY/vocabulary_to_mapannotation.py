@@ -87,8 +87,14 @@ for l in lines[1:]:
     cols = l.split(",")
     if len(cols) < 2:
         continue
-    key = cols[key_index]
-    key_rows[key] = cols   #in this way i get all the columns in the csv file
+    key = cols[key_index].strip()
+    # handle files with multiple rows with the samme key index
+    if key in key_rows:
+        values = key_rows[key]
+    else:
+        values = []
+    values.append(cols)
+    key_rows[key] = values
     #if i want to specify which columns to bring into the map annotation i should run the code below
     #key_rows[key] = [cols[0], cols[1], cols[2]]
 print key_rows.keys()
@@ -132,14 +138,15 @@ for i in images:
     kvpairs = ann.getValue()
 
     for kv in kvpairs:
-        key = kv[1]
+        key = kv[1].strip()
         print key
         # logic statement: if key value matches with the value in the csv file
         if key in key_rows:
             values = key_rows[key]
-       #create the list with the matching values
-            for col_name, value in zip(col_names, values):
-                new_values.append([col_name, value])
+            for v in values:
+                #create the list with the matching values
+                for col_name, value in zip(col_names, values):
+                    new_values.append([col_name, value])
         else:
             print "key not found", key
 
