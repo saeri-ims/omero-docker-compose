@@ -56,7 +56,7 @@ client = scripts.client(
     #define the position of the key in the csv file
     scripts.Int(
         "Key_position_in_csv", optional=False, grouping="3",
-        description="Indicate the position of the key in the csv table").ofType(rlong(0)),
+        description="Indicate the position of the key in the csv table"),
 
 )
 # we can now create our Blitz Gateway by wrapping the client object
