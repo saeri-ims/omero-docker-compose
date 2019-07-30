@@ -145,7 +145,7 @@ for i in images:
             values = key_rows[key]
             for v in values:
                 #create the list with the matching values
-                for col_name, value in zip(col_names, values):
+                for col_name, value in zip(col_names, v):
                     new_values.append([col_name, value])
         else:
             print "key not found", key
