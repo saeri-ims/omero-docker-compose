@@ -116,14 +116,24 @@ The resulting csv import is displayed here below
 
 __*add_kv_pairs_from_csv.py*__
 
-ADD SOME TEXT HERE. The script i wrote doens't throw a mistake but it doesn't do what i want. do not create object list.
+The script allows adding data from a csv file to the kvpairs list which is named "kvpairs_from_csv_script".
+
+According to where the csv is attached to, it is possible to apply the script to the single object (e.g. selected dataset or selected images) or to the nested objects (e.g. images within the selected dataset)
+
+ ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/kv_pairs_fromcsv.png)
+
+ **Important** The script has also the advantage to load the kvpairs maintining the owner of the data name. As explained later on this functionality is **very** important because when the data are moved to the public domain and become accessible to all, they keep all the kvpairs that the owner linked to them. If the kvpairs were added by admin, the data would have lost all the kvpairs when moved from a group to the public domain group, no matter if the operation was carried out by the owner of the images.  
+
 
 __*delete_annotations_by_namespace.py*__
 
-The script allows the users to delete the annotations (KVpairs mainly but tags are also possible if the namespace is known) that have been created for images and datasets by selecting the namespace and by deciding if they want to delete the annotation on the selected object or on the objects contained by the selected object (the so called children).
+The script is a good way to do some tidy up. In fact it allows the users to delete the annotations (KVpairs mainly but tags are also possible if the namespace is known) that have been created for images and datasets by selecting the namespace and by deciding if they want to delete the annotation on the selected object or on the objects contained by the selected object (the so called children).
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/remove_annotation_bynamespace.png)
 
+**Note 1:** the script will delete the map annotations regardless the ownership, it means that a sysadmin, which has membership in all the group can run the script, and delete kvpairs that have been added by other users.  
+
+**Note 2:** the script is also intelligent as it allows to overwrite the kvpairs list that already exist, thus for instance, if the csv table changes (note that it MUST be re-attached to the data) the script will replace the existing kvpair list with a new one adding the new values.
 
 __*export key and values from images within a dataset to a csv file.py*__
 
@@ -243,7 +253,7 @@ There are two scripts that run the controlled vocabulary:
 
 1. __*copy_tags_2kvpairs_per_selected_objects.py*__
 
-2. __*vocabulary to mapannotation.py*__
+2. __*vocabulary_to_mapannotation_multirows.py*__
 
 
 **How do the scripts work**
@@ -262,7 +272,7 @@ This script copy the tags for the selected objects and for the children in the s
 
 The csv file we want to import acts as a look-up table where the tags in the OMERO "kvpairs.from.tags.script" is looked up and, if found, the values in the matching row are copied into OMERO KVpairs section.
 
-After the __*copy_tags_2kvpairs_per_selected_objects.py*__ is run then it is the turn of __*vocabulary to mapannotation.py*__
+After the __*copy_tags_2kvpairs_per_selected_objects.py*__ is run then it is the turn of __*vocabulary_to_mapannotation_multirows.py*__
 
 **Important:** It is necessary to attach the csv file to the project and activate it.
 
@@ -270,7 +280,10 @@ The result is depicted below:
 
  ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/vocabulary_to_mapannotation.png)
 
- As visible in the image above, the script uses another namespace which again will help the users to understand from which script and operation the KVpairs have been created.
+ As visible in the image above, the script uses another namespace "kvpairs_from_vocabulary_script" which again will help the users to understand from which script and operation the KVpairs have been created.
+
+ **Important:** this script should MAINLY be used only when the user has a large table with image names that want to import into OMERO and match with the single images (hence create a kvpairs for each image with the correspondent data).
+ Therefore this script differs quite consistently from the **add_kv_pairs_from_csv.py** in its use. In fact, the utilisation of **add_kv_pairs_from_csv.py** is simply for adding <u> a generic descriptive csv file to an entire dataset or to its nested images.</u>  
 
  Having a controlled vocabulary will allow to retrieve all images that are falling within the broader classes in the hierarchy.
 
@@ -300,8 +313,16 @@ A new window pops up with the request to indicate the name of the group (where t
 
 If a name is not provided, the data will be stored in the orphaned images folder.
 
+**Important:** In our specific case and for current limitations in OMERO (see specific documentation on how to set public users) it is requested to the users willing to share their data **NOT TO** create a dataset **but allow the images to end in the orphaned section.**
+
 Data in the public folder can be made available to the public either by adding a generic public user to the group (this i task of sysadmin) OR by sharing the link with the data.
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/share_link_with_public_users.png)
 
-**Reminder:** once the link is shared the user won't have more control on what happens with the link (e.g. who gets the link can re-share it without notifying this to the owner of the image).
+**Reminder:** once the link is shared the user won't have more control on what happens with the link (e.g. who gets the link can re-share it without notifying this to the owner of the image). <u> The suggestion is to avoid using the link, rather move the data in the public domain and continue to have the control of the data.</u>
+
+The general public interface will look like the one depicted in the figure below
+
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/public_interface.png)
+
+**REMINDER FOR SYSADMIN** when OMERO is configured for public access then remember the IT support service people that they need to use the following link for the landing page of OMERO SERVERIP:4080/webclient/userdata/?experimenter=-1
