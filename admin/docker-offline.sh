@@ -2,9 +2,9 @@
 
 set -eu
 IMAGES=(
-    postgres:9.6
-    openmicroscopy/omero-server:5.5.0
-    openmicroscopy/omero-web-standalone:5.5.0
+    postgres:9.6.13
+    openmicroscopy/omero-server:5.5.1
+    openmicroscopy/omero-web-standalone:5.5.1
 )
 
 usage() {
