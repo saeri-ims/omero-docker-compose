@@ -26,7 +26,7 @@ import omero.scripts as scripts
 import omero
 
 import os
-#import csv
+
 
 # Script definition
 
@@ -38,7 +38,7 @@ import os
 data_types = [rstring('Project'), rstring('Dataset'),rstring('Image')]
 client = scripts.client(
     "remove_specified_tags_from_all_objects.py",
-    ("Customised script for removing specified tags from selected objects"),
+    ("Customised script for removing specified tags (links) from selected objects"),
     # first parameter
     scripts.String(
         "Data_Type", grouping="1", optional=False, values=data_types, default="Dataset"),
@@ -63,8 +63,10 @@ print "script parameters", script_params
 # get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
 ids = unwrap(client.getInput("IDs"))
 nametag = script_params["Tag_name"]
-nametag = nametag.strip()
+#the line below allows to add more than one tag name
+tag_names = [x.strip() for x in nametag.split(',')]
 objects = conn.getObjects(data_type, ids)
+
 
 
 #create the list of the objects (Datasets, images or both)
@@ -87,11 +89,30 @@ elif data_type == 'Dataset':
 else:
     object_list = objects
 
+#create the annotation lists per object
+link_to_delete_images = []
+link_to_delete_projects = []
+link_to_delete_datasets = []
 
 for obj in object_list:
-    print "data id", obj.getId()
-    tag_todelete = nametag
-    conn.deleteObjects('TagAnnotation', tag_todelete)
+    # for each object load the annotation (append)
+    for ann in obj.listAnnotations():
+        if ann.OMERO_TYPE == omero.model.TagAnnotationI:
+            if ann.getTextValue() in tag_names:
+                if isinstance(obj, omero.gateway.ImageWrapper):
+                    link_to_delete_images.append(ann.link.getId())
+                elif isinstance(obj, omero.gateway.DatasetWrapper):
+                    link_to_delete_datasets.append(ann.link.getId())
+                elif isinstance(obj, omero.gateway.ProjectWrapper):
+                    link_to_delete_projects.append(ann.link.getId())
+
+#if there is a tag name in the object specific list, then delete
+if len(link_to_delete_images) > 0:
+    conn.deleteObjects("ImageAnnotationLink", link_to_delete_images)
+if len(link_to_delete_datasets) > 0:
+    conn.deleteObjects("DatasetAnnotationLink", link_to_delete_datasets)
+if len(link_to_delete_projects) > 0:
+    conn.deleteObjects("ProjectAnnotationLink", link_to_delete_projects)
 
 # Return some value(s).
 
