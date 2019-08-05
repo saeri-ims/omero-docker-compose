@@ -37,7 +37,7 @@ import os
 # this script only takes Datasets
 data_types = [rstring('Project'), rstring('Dataset'),rstring('Image')]
 client = scripts.client(
-    "remove_specified_tags_from_all_objects.py",
+    "remove_specified_tags_from_selected_objects.py",
     ("Customised script for removing specified tags (links) from selected objects"),
     # first parameter
     scripts.String(
