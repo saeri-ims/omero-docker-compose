@@ -127,6 +127,7 @@ else:
 
 #loop to take the annotation in the keyvalue pairs already existent
 for i in images:
+    owner = i.getOwner().getName() #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
     print i.name
     ann = i.getAnnotation(tags_namespace)
     print "###annotation", ann
@@ -159,12 +160,13 @@ for i in images:
         continue
 
     # Return some value(s)
-
-    map_ann = omero.gateway.MapAnnotationWrapper(conn)
+    suconn = conn.suConn(owner)  #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
+    map_ann = omero.gateway.MapAnnotationWrapper(suconn)
     map_ann.setNs(voc_namespace)
     map_ann.setValue(new_values)
     map_ann.save()
     i.linkAnnotation(map_ann)
+    suconn.close()    #this line is necessary to "close" also the connection as "other user" as the sysadmin is now concluding to operate on behalf of the owner of the image
 
 
     #delete the previous vkpairs section
