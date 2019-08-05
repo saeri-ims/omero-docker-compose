@@ -158,6 +158,7 @@ The script requires first to select the object(s) from which the tag links need 
 
 The script takes one or more tag names, if more than one tag name is used, they need to be separated by comma.
 
+![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/remove_tagnames_selected.png)
 
 ### Working with tags:
 
