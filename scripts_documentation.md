@@ -150,6 +150,15 @@ datasetNAME_metadata_out.csv
 
 ![](https://github.com/saeri-ims/omero-docker-compose/blob/master/scripts_documentation/pictures/metadata_out_name.png)
 
+__**delete_tags_by_names.py**__
+
+A part from kvpairs, users can decide to delete also the tag that they linked to images. It is worth mentioning that **is the link between tag(s) and image(s) to be deleted and not the tag itself**.
+
+The script requires first to select the object(s) from which the tag links need to be removed, then to add the names of the tags to be deleted.
+
+The script takes one or more tag names, if more than one tag name is used, they need to be separated by comma.
+
+
 ### Working with tags:
 
 Tags are a very important feature in OMERO as they help searching for images. The IMS-GIS data centre opted to have a controlled tag system instead of a random one, based on people adding their own tags. The reasons for supporting a controlled tag system are:
