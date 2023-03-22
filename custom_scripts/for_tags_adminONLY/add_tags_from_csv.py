@@ -48,7 +48,7 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 
 # get the 'IDs' parameter of the csv file imported as annotation
@@ -56,9 +56,9 @@ print script_params
 file_id = script_params["File_Annotation"]
 file_ann = conn.getObject("FileAnnotation", file_id)
 csv_text = "".join(list(file_ann.getFileInChunks()))
-print csv_text
+print(csv_text)
 lines = csv_text.split("\n")
-print lines
+print(lines)
 data = []
 
 col_names = lines[0]
@@ -68,13 +68,13 @@ desc_index = 1
 
 for l in lines[1:]:
     cols = l.split(",")
-    print cols
+    print(cols)
     if len(cols) < 1:
         continue
     text = cols[name_index]
     tags = list(conn.getObjects("TagAnnotation", attributes={"textValue": text}))
     if len(tags) > 0:
-        print "Tag '%s' already exists" % text
+        print("Tag '%s' already exists" % text)
         continue
     tag_ann = omero.gateway.TagAnnotationWrapper(conn)
     tag_ann.setValue(text)
