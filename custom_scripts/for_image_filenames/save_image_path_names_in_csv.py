@@ -49,7 +49,7 @@ images = conn.getObjects("Image", ids)
 
 with open("selected_images_and_paths_names.csv", "w") as f:
     for i in images:
-    	print i.name
+    	print(i.name)
         image_paths = i.getImportedImageFilePaths()
         f.write(i.name)
         f.write(" ")
