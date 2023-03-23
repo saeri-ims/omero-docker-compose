@@ -53,7 +53,7 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-print "script parameters", script_params
+print("script parameters: "+str(script_params))
 
 
 # Define namespace to not allow editing in Insight & web
@@ -71,18 +71,18 @@ datasets = conn.getObjects("Dataset", ids)
 file_id = script_params["File_Annotation"]
 file_ann = conn.getObject("FileAnnotation", file_id)
 csv_text = "".join(list(file_ann.getFileInChunks()))
-print "csv text", csv_text
+print("csv text: "+str(csv_text))
 lines = csv_text.split("\n")
-print "csv lines", lines
+print("csv lines: "+str(lines))
 
 for ds in datasets:
-    print "dataset names", ds
+    print("dataset names: "+str(ds))
 
     owner = obj.getOwner().getName() #this line has been introduced to allow sysadmin to copy kvpairs on behalf of the owner's image
     data = []
     for l in lines:
         kv = l.split(",", 1)
-        print "key values", kv
+        print("key values"+str(kv))
         if len(kv) == 2:
             data.append(kv)
         elif len(kv) == 1:
