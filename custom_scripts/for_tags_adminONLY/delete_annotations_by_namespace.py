@@ -57,7 +57,7 @@ script_params = client.getInputs(unwrap=True)
 delete_self = script_params.get('Delete_Annotations_on_object', False)
 delete_children = script_params.get('Delete_Annotations_on_children', False)
 data_type = script_params['Data_Type']
-print script_params
+print(script_params)
 
 # Use 'client' namespace to allow editing in Insight & web
 
@@ -93,16 +93,16 @@ else:
 
 
 for obj in object_list:
-    print obj.getId()
+    print(obj.getId())
     ann_ids = []
     if ns == "none":
         ns = None
     for a in obj.listAnnotations(ns):
         #if a.OMERO_TYPE == given_type:
-        print a.getId(), a.OMERO_TYPE, a.ns
+        print(str(a.getId())+" - "+str(a.OMERO_TYPE)+" - "+str(a.ns))
         ann_ids.append(a.id)
     if len(ann_ids) > 0:
-        print "Deleting %s annotations..." % len(ann_ids)
+        print("Deleting %s annotations..." % len(ann_ids))
         conn.deleteObjects('Annotation', ann_ids, wait=True)
 
 
