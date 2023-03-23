@@ -46,14 +46,14 @@ conn = BlitzGateway(client_obj=client)
 conn.SERVICE_OPTS.setOmeroGroup('-1')
 
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 
 
 #in the listed tags check the duplicates and retain only the firts found and relink the images to this retained tag
 for g in conn.getObjects("ExperimenterGroup"):
     conn.SERVICE_OPTS.setOmeroGroup(g.id)
-    print "----groups", g.id, g.name
+    print("----groups: "+str(g.id)+" - "+str(g.name))
 
     #create a list of tags and append only the tags, tag id and tag owner id to it
     tags = []
@@ -66,7 +66,7 @@ for g in conn.getObjects("ExperimenterGroup"):
     #sort the tags in descending order to allow to see duplicates
 
     tags.sort(key=lambda tag: tag[0].lower())
-    print "sorted tags", tags
+    print("sorted tags: "+str(tags))
 
 
     prev_tag = ""
