@@ -43,7 +43,7 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 # Use 'client' namespace to allow editing in Insight & web
 
@@ -55,11 +55,11 @@ experimenters = conn.getObjects("Experimenter")
 exp_ids = []
 
 for e in experimenters:
-    print e.id, e.firstName, e.lastName
+    print(e.id, e.firstName, e.lastName)
     if e.id > 1:
         exp_ids.append(e.id)
 
-print "list ids", exp_ids
+print("list ids", exp_ids)
 
 
 # move users to a single object, in this case public domain
