@@ -50,7 +50,7 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 
 # get the 'IDs' parameter of the Images
@@ -59,7 +59,7 @@ images = conn.getObjects("Image", ids)
 
 for i in images:
     image_name = i.name
-    print "image name is", image_name
+    print("image name is: "+str(image_name))
 
     tag_ann = omero.gateway.TagAnnotationWrapper(conn)
     tag_ann.setValue(image_name)
