@@ -49,7 +49,7 @@ images = conn.getObjects("Image", ids)
 
 with open("selected_images_names.csv", "w") as f:
     for i in images:
-    	print i.name, '\n'
+    	print(i.name+"'\n'")
         f.write(i.name)
         f.write('\n')
 
