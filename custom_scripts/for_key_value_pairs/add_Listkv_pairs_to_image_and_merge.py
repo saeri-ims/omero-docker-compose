@@ -52,7 +52,7 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 namespace = NSCLIENTMAPANNOTATION
 
@@ -63,7 +63,7 @@ keys = unwrap(client.getInput("New_keys"))
 values = unwrap(client.getInput("New_values"))
 
 for i in images:
-    print i.name
+    print(i.name)
     key_value_data = []
 
     to_delete = []
@@ -83,7 +83,7 @@ for i in images:
     if len(to_delete) > 0:
         conn.deleteObjects('Annotation', to_delete)
 
-    print key_value_data
+    print(key_value_data)
 
 # Use 'client' namespace to allow editing in Insight & web
 

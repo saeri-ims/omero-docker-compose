@@ -45,7 +45,7 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 #check tags in all groups
 conn.SERVICE_OPTS.setOmeroGroup('-1')
@@ -54,16 +54,16 @@ conn.SERVICE_OPTS.setOmeroGroup('-1')
 file_id = script_params["File_Annotation"]
 file_ann = conn.getObject("FileAnnotation", file_id)
 csv_text = "".join(list(file_ann.getFileInChunks()))
-print csv_text
+print(csv_text)
 lines = csv_text.split("\n")
-print lines
+print(lines)
 data = []
 
 col_names = lines[0]
 
 #get first the user ID as we want to search only for the tags that do not belong to the user id which is the admin
 myOwnerId = conn.getUserId()
-print 'myOwnerId', myOwnerId
+print('myOwnerId: '+str(myOwnerId))
 
 name_index = 0
 desc_index = 1
@@ -71,7 +71,7 @@ desc_index = 1
 for l in lines[1:]:
     conn.SERVICE_OPTS.setOmeroGroup('-1')
     cols = l.split(",")
-    print cols
+    print(cols)
     if len(cols) < 3:
         continue
     text = cols[name_index]

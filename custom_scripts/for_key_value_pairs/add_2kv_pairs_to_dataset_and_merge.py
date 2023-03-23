@@ -52,7 +52,7 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 namespace = omero.constants.metadata.NSCLIENTMAPANNOTATION
 
@@ -66,7 +66,7 @@ second_k = script_params["Second_key"]
 second_v = script_params["Second_value"]
 
 for ds in datasets:
-    print ds.name
+    print(ds.name)
     key_value_data = []
 
     to_delete = []
@@ -85,7 +85,7 @@ for ds in datasets:
     if len(to_delete) > 0:
         conn.deleteObjects('Annotation', to_delete)
 
-    print key_value_data
+    print(key_value_data)
 
 # Use 'client' namespace to allow editing in Insight & web
 

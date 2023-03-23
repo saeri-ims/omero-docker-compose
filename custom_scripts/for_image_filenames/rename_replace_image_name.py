@@ -49,7 +49,7 @@ client = scripts.client(
 # we can now create our Blitz Gateway by wrapping the client object
 conn = BlitzGateway(client_obj=client)
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 # get the 'IDs' parameter (which we have restricted to 'Image' IDs)
 ids = unwrap(client.getInput("IDs"))
@@ -61,14 +61,14 @@ new = script_params["New_Text"]
 old = script_params.get("Old_Text")
 
 for i in images:
-    print i.name
+    print(i.name)
     name, ext = os.path.splitext(i.name)
     text = os.path.basename(i.name)
     if old is not None:
         replaced_text = text.replace(old, new)
-        print replaced_text
+        print(replaced_text)
     new_imagename = prefix + name + postfix + ext
-    print new_imagename
+    print(new_imagename)
     # i._obj.name = rstring(new_imagename)
     i.setName(new_imagename)
     i.setName(replaced_text)

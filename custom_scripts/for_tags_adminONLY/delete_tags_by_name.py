@@ -57,7 +57,7 @@ script_params = client.getInputs(unwrap=True)
 delete_self = script_params.get('Delete_Tags_on_object', False)
 delete_children = script_params.get('Delete_Tags_on_children', False)
 data_type = script_params['Data_Type']
-print "script parameters", script_params
+print("script parameters: "+str(script_params))
 
 
 # get the 'IDs' parameter (which we have restricted to 'Dataset' IDs)
