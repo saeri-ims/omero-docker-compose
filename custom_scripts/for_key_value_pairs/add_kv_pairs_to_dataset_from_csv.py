@@ -60,7 +60,7 @@ script_params = client.getInputs(unwrap=True)
 add_self = script_params.get('Add_kvpairs_to_object', False)
 add_children = script_params.get('Add_kvpairs_to_children', False)
 data_type = script_params['Data_Type']
-print script_params
+print(script_params)
 
 
 # Define namespace to not allow editing in Insight & web
@@ -78,14 +78,14 @@ ids = unwrap(client.getInput("IDs"))
 file_id = script_params["File_Annotation"]
 file_ann = conn.getObject("FileAnnotation", file_id)
 csv_text = "".join(list(file_ann.getFileInChunks()))
-print csv_text
+print(csv_text)
 lines = csv_text.split("\n")
-print lines
+print(lines)
 
 
 #connect to the object
 objects = conn.getObjects(data_type, ids)
-print "objects", objects
+print("objects: "+str(objects))
 
 #create the list of the objects (Datasets, images or both)
 object_list = []
@@ -100,7 +100,7 @@ if data_type == 'Dataset':
 else:
     object_list = objects
 
-print object_list
+print(object_list)
 
 for obj in object_list:
 
@@ -109,13 +109,13 @@ for obj in object_list:
     data = []
     for l in lines:
         kv = l.split(",", 1)
-        print kv
+        print(kv)
         if len(kv) == 2:
             data.append(kv)
         elif len(kv) == 1:
             data.append([kv[0], ""])
 
-    print "list data", data
+    print("list data: "+str(data))
 
     to_delete = []
     for ann in obj.listAnnotations(ns=namespace):
