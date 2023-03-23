@@ -48,11 +48,11 @@ conn = BlitzGateway(client_obj=client)
 conn.SERVICE_OPTS.setOmeroGroup('-1')
 
 script_params = client.getInputs(unwrap=True)
-print script_params
+print(script_params)
 
 #get first the user ID as we want to search only for the tags that do not belong to the user id which is the admin
 myOwnerId = conn.getUserId()
-print 'myOwnerId', myOwnerId
+print('myOwnerId: '+str(myOwnerId))
 
 
 #create a list of tags and append only the tags, description,tag id and tag owner id to it
@@ -60,7 +60,7 @@ tags = []
 
 for tag in conn.getObjects("TagAnnotation"):
     owner = tag.getDetails().owner.id.val
-    print tag.textValue, owner
+    print(str(tag.textValue)+" - "+str(owner))
     if owner == myOwnerId:
         continue
     desc = tag.description if tag.description else ""
