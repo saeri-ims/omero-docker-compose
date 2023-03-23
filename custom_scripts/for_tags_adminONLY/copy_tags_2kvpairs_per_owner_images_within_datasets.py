@@ -55,7 +55,7 @@ script_params = client.getInputs(unwrap=True)
 copy_self = script_params.get('Copy_tags_on_object', False)
 copy_children = script_params.get('Copy_tags_on_children', False)
 data_type = script_params['Data_Type']
-print script_params
+print(script_params)
 
 # Use 'client' namespace to allow editing in Insight & web
 
@@ -86,14 +86,14 @@ for obj in object_list:
         if isinstance(ann, omero.gateway.TagAnnotationWrapper):
             tag_values.append(ann.textValue)
 
-    print "list tags", tag_values
+    print("list tags: "+str(tag_values))
 
     key_values = []
 
     for index, value in enumerate(tag_values):
         key_values.append([str(index), value])
 
-    print "list kvs", key_values
+    print("list kvs: "+str(key_values))
 
 
     to_delete = []
