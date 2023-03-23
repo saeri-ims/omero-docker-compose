@@ -110,7 +110,7 @@ def attach_csv_file( conn, obj, data ):
 
     # remove the tmp file
     os.remove(tmp_file)
-    os.rmdir (tmp_dir )
+    os.rmdir(tmp_dir)
     return "done"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
